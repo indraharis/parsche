@@ -16,8 +16,21 @@
 #define KING			6
 
 //array 0 for dummy
+int ply;
+int gameply;
+int board[64]={ 
+	4, 2, 3, 5, 6, 3, 2, 4,
+	1, 1, 1, 1, 1, 1, 1, 1,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+   -1,-1,-1,-1,-1,-1,-1,-1,
+   -4,-2,-3,-5,-6,-3,-2,-4
+   };
+int history_board[64][64];
 
-BOOL slide[7] = {
+bool slide[7] = {
 	FALSE,FALSE, FALSE, TRUE, TRUE, TRUE, FALSE
 };
 
@@ -25,14 +38,18 @@ int number_of_move[7] = {
 	0, 0, 8, 4, 4, 8, 8
 };
 
+int pieces_value[7] = {
+	V_NULL, V_PAWN, V_KNIGHT, V_BISHOP, V_ROOK, V_QUEEN, V_KING
+	};
+	
 int movement[7][8] = {
-	{ 0, 0, 0, 0, 0, 0, 0, 0 },		//dummy
-	{ 0, 0, 0, 0, 0, 0, 0, 0 },
-	{ -21, -19, -12, -8, 8, 12, 19, 21 },
-	{ -11, -9, 9, 11, 0, 0, 0, 0 },
-	{ -10, -1, 1, 10, 0, 0, 0, 0 },
-	{ -11, -10,  -9, -1, 1,  9, 10, 11 },
-	{ -11, -10,  -9, -1, 1,  9, 10, 11 }
+	{ 0, 0, 0, 0, 0, 0, 0, 0 },				//dummy
+	{ 0, 0, 0, 0, 0, 0, 0, 0 },				//pawn
+	{ -21, -19, -12, -8, 8, 12, 19, 21 },	//dullahan knight
+	{ -11, -9, 9, 11, 0, 0, 0, 0 },		 	//bishop
+	{ -10, -1, 1, 10, 0, 0, 0, 0 }, 	 	//barathum rook
+	{ -11, -10,  -9, -1, 1,  9, 10, 11 },	//queen of fire, candidate for stepmother
+	{ -11, -10,  -9, -1, 1,  9, 10, 11 }	//useless king
 };
 
 int evaluate(int* board)
