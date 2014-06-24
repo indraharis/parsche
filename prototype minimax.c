@@ -164,7 +164,34 @@ int maxi( int depth, bool maximize ) {
 	}
 }
  
-int check_move(int piece_pos, int piece_des)
+int check_move(int piece_pos, int n_move)
+{
+	int lpiece=board[piece_pos] & MASK_PIECE;
+	int lcolor=board[piece_pos] & MASK_COLOR;
+	int lcolor_target;
+	
+	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
+	int get_move_value=movement[lpiece][n_move];	//convert direction into movement value
+	int destination = mailbox[mb_pos+move_value];	
+	
+	if(destination==-1)
+	{
+		//out of bound
+	}else
+	{
+		lcolor_target = board[destination] & MASK_COLOR;
+		if(lcolor==lcolor_target) //same color, illegal
+		{
+			//illegal move
+		}else
+		{
+			//allowed move
+		}
+	}
+	
+}
+
+int check_player_move(int piece_pos, int piece_des)
 {
 	
 }
@@ -181,10 +208,19 @@ int move_piece(int piece_pos, int n_move)
 	
 	if(destination==-1)
 	{
-		return -1;
-	}else{
-		return board[destination];
-	}	
+		//out of bound
+	}else
+	{
+		lcolor_target = board[destination] & MASK_COLOR;
+		if(lcolor==lcolor_target) //same color, illegal
+		{
+			//illegal move
+		}else
+		{
+			//allowed move
+		}
+	}
+	
 }
 
 /* //from wiki-wikipedia
