@@ -175,12 +175,16 @@ int move_piece(int piece_pos, int n_move)
 	int lcolor=board[piece_pos] & MASK_COLOR;
 	int lcolor_target;
 	
-	int mb_pos=mailbox64[piece_pos];
-	int move_value=movement[lpiece][n_move];
-	int mailbox64_pos;
+	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
+	int get_move_value=movement[lpiece][n_move];	//convert direction into movement value
+	int destination = mailbox[mb_pos+move_value];	
 	
-	
-	
+	if(destination==-1)
+	{
+		return -1;
+	}else{
+		return board[destination];
+	}	
 }
 
 /* //from wiki-wikipedia
