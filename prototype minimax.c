@@ -21,6 +21,16 @@ BOOL slide[7] = {
 	FALSE,FALSE, FALSE, TRUE, TRUE, TRUE, FALSE
 };
 
+int point[7] = {
+	0, 	//EMPTY
+	100, 	//PAWN
+	300, 	//KNIGHT
+	325, 	//BISHOP
+	500, 	//ROOK
+	900, 	//QUEEN
+	30000	//KING
+};
+
 int number_of_move[7] = {
 	0, 0, 8, 4, 4, 8, 8
 };
@@ -44,31 +54,7 @@ int evaluate(int* board)
 	
 	for(i=0;i<64;i++)
 	{
-		switch(board[i])
-		{
-			case PAWN:
-				addpoint=V_PAWN;
-				break;
-			case KNIGHT:
-				addpoint=V_KNIGHT;
-				break;
-			case BISHOP:
-				addpoint=V_BISHOP;
-				break;
-			case ROOK:
-				addpoint=V_ROOK;
-				break;
-			case QUEEN:
-				addpoint=V_QUEEN;
-				break;
-			case KING:
-				addpoint=V_KING;
-				break;
-			default:
-				addpoint=V_NULL;
-				break;			
-		};
-		
+		addpoint=point[board[i]];		
 		lpiece=color[i];
 		if(lpiece)
 		{
