@@ -155,6 +155,8 @@ int maxi( int depth, bool maximize ) {
 						{
 							break;
 						}
+						
+						if()
 						/*
 						move(i,des_move);
 						score = maxi( depth - 1, false );        
@@ -201,21 +203,21 @@ bool check_move(int piece_pos, int des_move)
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
 	
-	//check boundary
+	//1. check boundary
 	if(destination==-1)
 	{
 		//out of bound
 		return false;
 	}else{
-		if(( board[destination] & MASK_PIECE) == 0)	//check if empty
+		if(( board[destination] & MASK_PIECE) == 0)	//2. check if empty
 		{
 			return true;
-		}else										//if not empty, check their color
+		}else										//3. if not empty, check their color
 		{
 			lcolor_target=board[destination] & MASK_COLOR;
 			if(lcolor==lcolor_target)				//you cannot attack same color
 			{
-			//friendly fire,
+				//hold your attack, its our ally
 				return false;
 			}else
 			{
@@ -226,7 +228,26 @@ bool check_move(int piece_pos, int des_move)
 	}	
 }
 
-bool check_move_player(int piece_pos, int piece_des)
+int check_target_color(int piece_pos, int des_move)
+{
+	int lpiece=board[piece_pos] & MASK_PIECE;
+	int lcolor=board[piece_pos] & MASK_COLOR;
+	int lcolor_target;
+	
+	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
+	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
+	
+	if(destination==-1)
+	{
+		//out of bound,return -1
+		return -1;
+	}else
+	{
+		return ( board[destination] & MASK_COLOR );
+	}
+}
+
+bool check_move_player(int piece_pos, int des_move)
 {
 	
 }
