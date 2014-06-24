@@ -32,7 +32,7 @@
 
 //array 0 for dummy
 int ply;
-int gameply;
+int depthply;
 int board[64]={ 
 	4, 2, 3, 5, 6, 3, 2, 4,
 	1, 1, 1, 1, 1, 1, 1, 1,
@@ -226,7 +226,7 @@ bool check_move(int piece_pos, int des_move)
 	}	
 }
 
-int check_move_player(int piece_pos, int piece_des)
+bool check_move_player(int piece_pos, int piece_des)
 {
 	
 }
