@@ -134,24 +134,35 @@ int maxi( int depth, bool maximize ) {
 	int score;	//score for minimax
 	int lpiece;
 	int lcolor;
+	int des_move;
     if ( depth <= 0 ) return evaluate();
 	if ( maximize )
 	{
         max = -V_MAX;
 		
-		history_board[depth]=board;		//record history (of three kingdom)
+		history_board[depth]=tboard;		//record history (of three kingdom)
 		for ( i=0; i<64; i++ ) {		//scan board
 			lpiece = board[i] & MASK_PIECE;
 			lcolor = board[i] & MASK_COLOR;
 			if(( lpiece != 0) && ( lcolor == COLOR_WHITE))
 			{
 				for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ ) {	
-					
-					move(pawn,moves);
-					score = maxi( depth - 1, false );        
-					if( score > max ) max = score;
-					board=history_board[depth];		//return board
-					
+					des_move=0;
+					do
+					{
+						des_move=des_move+movement[lpiece][n_move];
+						if(!check_move(i,des_move))
+						{
+							break;
+						}
+						/*
+						move(i,des_move);
+						score = maxi( depth - 1, false );        
+						if( score > max ) max = score;
+						tboard=history_board[depth];		//return board
+						*/
+						
+					}while(slide[lpiece]);
 				}
 			}
 		}
@@ -174,8 +185,48 @@ int maxi( int depth, bool maximize ) {
 		return max;
 	}
 }
+ /**
+	check_move mechanism:
+	1. check if out of bound
+	2. check if empty
+	3. check friendly piece
  
-int check_move(int piece_pos, int piece_des)
+ */
+bool check_move(int piece_pos, int des_move)
+{
+	int lpiece=board[piece_pos] & MASK_PIECE;
+	int lcolor=board[piece_pos] & MASK_COLOR;
+	int lcolor_target;
+	
+	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
+	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
+	
+	//check boundary
+	if(destination==-1)
+	{
+		//out of bound
+		return false;
+	}else{
+		if(( board[destination] & MASK_PIECE) == 0)	//check if empty
+		{
+			return true;
+		}else										//if not empty, check their color
+		{
+			lcolor_target=board[destination] & MASK_COLOR;
+			if(lcolor==lcolor_target)				//you cannot attack same color
+			{
+			//friendly fire,
+				return false;
+			}else
+			{
+				//yes, kill him!!
+				return true;
+			}
+		}
+	}	
+}
+
+int check_move_player(int piece_pos, int piece_des)
 {
 	
 }
