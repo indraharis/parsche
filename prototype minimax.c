@@ -112,15 +112,10 @@ int evaluate()
 	
 	for(i=0;i<64;i++)
 	{
-<<<<<<< HEAD
-		addpoint=point[board[i]];		
-		lpiece=color[i];
-		if(lpiece)
-=======
+	
 		lpiece = board[i] & MASK_PIECE;
 		lcolor = board[i] & MASK_COLOR;
 		if(lcolor == 0)
->>>>>>> origin/master
 		{
 			total = total + pieces_value[lpiece];
 		}else
