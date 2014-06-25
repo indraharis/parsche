@@ -142,16 +142,24 @@ int maxi( int depth, bool maximize ) {
 		
 		history_board[depth]=tboard;		//record history (of three kingdom)
 		for ( i=0; i<64; i++ ) {		//scan board
-			lpiece = board[i] & MASK_PIECE;
-			lcolor = board[i] & MASK_COLOR;
+			lpiece = tboard[i] & MASK_PIECE;
+			lcolor = tboard[i] & MASK_COLOR;
 			if(( lpiece != 0) && ( lcolor == COLOR_WHITE))
 			{
-				for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ ) {	
-					if(lpiece==PAWN)
+				if(lpiece==PAWN)
+				{
+					/*
+					if(check_move(i,10))
 					{
+						move_piece(i,des_move);
+						score = maxi( depth - 1, false );        
+						if( score > max ) max = score;
+						tboard=history_board[depth];
+					}*/
+				}else
+				{
+					for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ ) {	
 					
-					}else
-					{
 						des_move=0;
 						do
 						{
@@ -175,7 +183,7 @@ int maxi( int depth, bool maximize ) {
 							if( score > max ) max = score;
 							tboard=history_board[depth];		//return board
 						
-						}while(slide[lpiece]);
+						}while(slide[lpiece]);					
 					}
 				}
 			}
