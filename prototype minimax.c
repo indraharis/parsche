@@ -147,24 +147,36 @@ int maxi( int depth, bool maximize ) {
 			if(( lpiece != 0) && ( lcolor == COLOR_WHITE))
 			{
 				for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ ) {	
-					des_move=0;
-					do
+					if(lpiece==PAWN)
 					{
-						des_move=des_move+movement[lpiece][n_move];
-						if(!check_move(i,des_move))
+					
+					}else
+					{
+						des_move=0;
+						do
 						{
-							break;
-						}
+							des_move=des_move+movement[lpiece][n_move];
+							if(!check_move(i,des_move))
+							{
+								break;
+							}
 						
-						if()
-						/*
-						move(i,des_move);
-						score = maxi( depth - 1, false );        
-						if( score > max ) max = score;
-						tboard=history_board[depth];		//return board
-						*/
+							if(lcolor!=check_target_color(i,des_move))//if capture
+							{
+								move_piece(i,des_move);
+								score = maxi( depth - 1, false );        
+								if( score > max ) max = score;
+								tboard=history_board[depth];		//return board
+								break;								//stop
+							}
 						
-					}while(slide[lpiece]);
+							move(i,des_move);
+							score = maxi( depth - 1, false );        
+							if( score > max ) max = score;
+							tboard=history_board[depth];		//return board
+						
+						}while(slide[lpiece]);
+					}
 				}
 			}
 		}
@@ -172,17 +184,18 @@ int maxi( int depth, bool maximize ) {
 		return max;
 	}else
 	{
+		/*
 		max = V_MAX;
 		history_board[depth]=board;	
 		
 		for ( i=0; i<64; i++ ) {	//scan beard
-			for( /*all moves*/) {
+			for( all moves) {
 				move(pawn,moves);
 				score = maxi( depth - 1, true );
 				if( score < max ) max = score;
 				board=history_board[depth];
 			}
-		}		
+		}*/		
 		
 		return max;
 	}
@@ -252,22 +265,20 @@ bool check_move_player(int piece_pos, int des_move)
 	
 }
 
-int move_piece(int piece_pos, int n_move)
+int move_piece(int piece_pos, int des_move)
 {
-	int lpiece=board[piece_pos] & MASK_PIECE;
-	int lcolor=board[piece_pos] & MASK_COLOR;
-	int lcolor_target;
-	
+	int tpiece=tboard[piece_pos];
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
-	int get_move_value=movement[lpiece][n_move];	//convert direction into movement value
-	int destination = mailbox[mb_pos+move_value];	
+	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
 	
 	if(destination==-1)
 	{
+		//out of bound
 		return -1;
 	}else{
-		return board[destination];
-	}	
+		tboard[destination]=tpiece;
+		tboard[piece_pos]=EMPTY;
+	}
 }
 
 /* //from wiki-wikipedia
