@@ -69,7 +69,7 @@ int pieces_value[7] = {
 	
 int movement[7][8] = {
 	{   0,   0,   0,  0, 0,  0,  0,  0 },				//dummy
-	{   0,   0,   0,  0, 0,  0,  0,  0 },				//creep
+	{   10,  9,  11,  0, 0,  0,  0,  0 },				//creep
 	{ -21, -19, -12, -8, 8, 12, 19, 21 },	//dullahan knight
 	{ -11,  -9,   9, 11, 0,  0,  0,  0 },		 	//bishop
 	{ -10,  -1,   1, 10, 0,  0,  0,  0 }, 	 	//barathum rook
@@ -126,7 +126,9 @@ int evaluate()
 	return total;
 }
 
-
+/*
+	this is our monster!!
+*/
 int maxi( int depth, bool maximize ) {
 	int max;	//max or min
 	int i;		//scan board
@@ -148,14 +150,17 @@ int maxi( int depth, bool maximize ) {
 			{
 				if(lpiece==PAWN)
 				{
-					/*
-					if(check_move(i,10))
+					for ( n_move = 0; n_move < 3; n_move++ )
 					{
-						move_piece(i,des_move);
-						score = maxi( depth - 1, false );        
-						if( score > max ) max = score;
-						tboard=history_board[depth];
-					}*/
+						if(check_pawn_move(i,movement[lpiece][n_move])
+						{
+							move_piece(i,des_move);
+							score = maxi( depth - 1, false );        
+							if( score > max ) max = score;
+							tboard=history_board[depth];
+						}
+					}
+					
 				}else
 				{
 					for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ ) {	
@@ -268,6 +273,11 @@ int check_target_color(int piece_pos, int des_move)
 	}
 }
 
+bool check_pawn_move(int piece_pos, int des_move)
+{
+	
+}
+
 bool check_move_player(int piece_pos, int des_move)
 {
 	
@@ -289,6 +299,11 @@ int move_piece(int piece_pos, int des_move)
 	}
 }
 
+//its just dummy main function
+int not_main()
+{
+	
+}
 /* //from wiki-wikipedia
 function minimax(node, depth, maximizingPlayer)
     if depth = 0 or node is a terminal node
