@@ -67,13 +67,13 @@ int pieces_value[7] = {
 	};
 	
 int movement[7][8] = {
-	{   0,   0,   0,  0, 0,  0,  0,  0 },	//dummy
-	{   10,  9,  11,  0, 0,  0,  0,  0 },	//creep
-	{ -21, -19, -12, -8, 8, 12, 19, 21 },	//dullahan knight
-	{ -11,  -9,   9, 11, 0,  0,  0,  0 },	//bishop
-	{ -10,  -1,   1, 10, 0,  0,  0,  0 }, 	//barathum rook
-	{ -11, -10,  -9, -1, 1,  9, 10, 11 },	//queen of fire, candidate for stepmother
-	{ -11, -10,  -9, -1, 1,  9, 10, 11 }	//useless king
+	{   0,   0,   0,  0,  0,  0,  0,  0 },	//dummy
+	{   10,  9,  11,  0,-10, -9,-11,  0 },	//creep
+	{ -21, -19, -12, -8,  8, 12, 19, 21 },	//dullahan knight
+	{ -11,  -9,   9, 11,  0,  0,  0,  0 },	//bishop
+	{ -10,  -1,   1, 10,  0,  0,  0,  0 }, 	//barathum rook
+	{ -11, -10,  -9, -1,  1,  9, 10, 11 },	//queen of fire, candidate for stepmother
+	{ -11, -10,  -9, -1,  1,  9, 10, 11 }	//useless king
 };
 
 int mailbox[120] = {
@@ -114,7 +114,7 @@ int evaluate()
 	
 		lpiece = board[i] & MASK_PIECE;
 		lcolor = board[i] & MASK_COLOR;
-		if(lcolor == 0)
+		if(lcolor == COLOR_WHITE)
 		{
 			total = total + pieces_value[lpiece];
 		}else
@@ -145,7 +145,7 @@ int maxi( int depth, bool maximize ) {
 		for ( i=0; i<64; i++ ) {			//scan board
 			lpiece = tboard[i] & MASK_PIECE;
 			lcolor = tboard[i] & MASK_COLOR;
-			if(( lpiece != 0) && ( lcolor == COLOR_WHITE))
+			if(( lpiece != EMPTY) && ( lcolor == COLOR_WHITE))
 			{
 				if(lpiece==PAWN)
 				{
@@ -174,7 +174,7 @@ int maxi( int depth, bool maximize ) {
 								break;
 							}
 						
-							if(lcolor!=check_target_color(i,des_move))	//if capture
+							if(check_target_color(i,des_move))	//if capture
 							{
 								move_piece(i,des_move);
 								score = maxi( depth - 1, false );        
@@ -238,7 +238,7 @@ bool check_move(int piece_pos, int des_move)
 	}else{
 		lcolor_target = board[destination] & MASK_COLOR;
 		lpiece_target = board[destination] & MASK_PIECE;
-		if(lpiece_target) == 0)	//2. check if empty
+		if(lpiece_target) == EMPTY)	//2. check if empty
 		{
 			return true;
 		}else										//3. if not empty, check their color
@@ -257,10 +257,12 @@ bool check_move(int piece_pos, int des_move)
 	}	
 }
 
+//check if its empty and have different color, return true if they have different color
 int check_target_color(int piece_pos, int des_move)
 {
-	int lpiece=board[piece_pos] & MASK_PIECE;
-	int lcolor=board[piece_pos] & MASK_COLOR;
+	int lpiece=tboard[piece_pos] & MASK_PIECE;
+	int lcolor=tboard[piece_pos] & MASK_COLOR;
+	int lpiece_target;
 	int lcolor_target;
 	
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
@@ -269,10 +271,24 @@ int check_target_color(int piece_pos, int des_move)
 	if(destination==-1)
 	{
 		//out of bound,return -1
-		return -1;
+		return false;
 	}else
 	{
-		return ( tboard[destination] & MASK_COLOR );
+		lpiece_target=tboard[destination] & MASK_PIECE;
+		lcolor_target=tboard[destination] & MASK_COLOR;
+		if(lpiece==EMPTY)
+		{
+			return false;
+		}else
+		{
+			if(lcolor==lcolor_target)
+			{
+				return false;
+			}else
+			{
+				return true;
+			}
+		}
 	}
 }
 
