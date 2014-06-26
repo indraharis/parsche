@@ -67,11 +67,11 @@ int pieces_value[7] = {
 	};
 	
 int movement[7][8] = {
-	{   0,   0,   0,  0, 0,  0,  0,  0 },				//dummy
-	{   10,  9,  11,  0, 0,  0,  0,  0 },				//creep
+	{   0,   0,   0,  0, 0,  0,  0,  0 },	//dummy
+	{   10,  9,  11,  0, 0,  0,  0,  0 },	//creep
 	{ -21, -19, -12, -8, 8, 12, 19, 21 },	//dullahan knight
-	{ -11,  -9,   9, 11, 0,  0,  0,  0 },		 	//bishop
-	{ -10,  -1,   1, 10, 0,  0,  0,  0 }, 	 	//barathum rook
+	{ -11,  -9,   9, 11, 0,  0,  0,  0 },	//bishop
+	{ -10,  -1,   1, 10, 0,  0,  0,  0 }, 	//barathum rook
 	{ -11, -10,  -9, -1, 1,  9, 10, 11 },	//queen of fire, candidate for stepmother
 	{ -11, -10,  -9, -1, 1,  9, 10, 11 }	//useless king
 };
@@ -129,20 +129,20 @@ int evaluate()
 	this is our monster!!
 */
 int maxi( int depth, bool maximize ) {
-	int max;	//max or min
-	int i;		//scan board
-	int n_move;	//number of move
-	int score;	//score for minimax
+	int max;		//max or min
+	int i;			//scan board
+	int n_move;		//number of move
+	int score;		//score for minimax
 	int lpiece;
 	int lcolor;
-	int des_move;
+	int des_move; 	//destination move
     if ( depth <= 0 ) return evaluate();
 	if ( maximize )
 	{
         max = -V_MAX;
 		
 		history_board[depth]=tboard;		//record history (of three kingdom)
-		for ( i=0; i<64; i++ ) {		//scan board
+		for ( i=0; i<64; i++ ) {			//scan board
 			lpiece = tboard[i] & MASK_PIECE;
 			lcolor = tboard[i] & MASK_COLOR;
 			if(( lpiece != 0) && ( lcolor == COLOR_WHITE))
@@ -174,19 +174,19 @@ int maxi( int depth, bool maximize ) {
 								break;
 							}
 						
-							if(lcolor!=check_target_color(i,des_move))//if capture
+							if(lcolor!=check_target_color(i,des_move))	//if capture
 							{
 								move_piece(i,des_move);
 								score = maxi( depth - 1, false );        
 								if( score > max ) max = score;
-								tboard=history_board[depth];		//return board
-								break;								//stop
+								tboard=history_board[depth];			//return board
+								break;									//stop
 							}
 						
 							move(i,des_move);
 							score = maxi( depth - 1, false );        
 							if( score > max ) max = score;
-							tboard=history_board[depth];		//return board
+							tboard=history_board[depth];				//return board
 						
 						}while(slide[lpiece]);					
 					}
