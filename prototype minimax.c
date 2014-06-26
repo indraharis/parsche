@@ -33,7 +33,7 @@
 //array 0 for dummy
 int ply;
 int depthply;
-int board[64]={ 
+int init_board[64]={ 
 	4, 2, 3, 5, 6, 3, 2, 4,
 	1, 1, 1, 1, 1, 1, 1, 1,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -43,20 +43,13 @@ int board[64]={
     9, 9, 9, 9, 9, 9, 9, 9,
    12,10,11,13,14,11,10,12
    };
+   
+int  board[64];
+int tboard[64];
 int history_board[64][64];
 
 bool slide[7] = {
 	FALSE,FALSE, FALSE, TRUE, TRUE, TRUE, FALSE
-};
-
-int point[7] = {
-	0, 	//EMPTY
-	100, 	//PAWN
-	300, 	//KNIGHT
-	325, 	//BISHOP
-	500, 	//ROOK
-	900, 	//QUEEN
-	30000	//KING
 };
 
 int number_of_move[7] = {
@@ -64,7 +57,13 @@ int number_of_move[7] = {
 };
 
 int pieces_value[7] = {
-	V_NULL, V_PAWN, V_KNIGHT, V_BISHOP, V_ROOK, V_QUEEN, V_KING
+	V_NULL, 
+	V_PAWN, 
+	V_KNIGHT, 
+	V_BISHOP, 
+	V_ROOK, 
+	V_QUEEN, 
+	V_KING
 	};
 	
 int movement[7][8] = {
@@ -152,7 +151,8 @@ int maxi( int depth, bool maximize ) {
 				{
 					for ( n_move = 0; n_move < 3; n_move++ )
 					{
-						if(check_pawn_move(i,movement[lpiece][n_move])
+						des_move = movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; for BLACK */
+						if(check_pawn_move(i,des_move)
 						{
 							move_piece(i,des_move);
 							score = maxi( depth - 1, false );        
@@ -225,6 +225,7 @@ bool check_move(int piece_pos, int des_move)
 	int lpiece=board[piece_pos] & MASK_PIECE;
 	int lcolor=board[piece_pos] & MASK_COLOR;
 	int lcolor_target;
+	int lpiece_target;
 	
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
@@ -235,12 +236,14 @@ bool check_move(int piece_pos, int des_move)
 		//out of bound
 		return false;
 	}else{
-		if(( board[destination] & MASK_PIECE) == 0)	//2. check if empty
+		lcolor_target = board[destination] & MASK_COLOR;
+		lpiece_target = board[destination] & MASK_PIECE;
+		if(lpiece_target) == 0)	//2. check if empty
 		{
 			return true;
 		}else										//3. if not empty, check their color
 		{
-			lcolor_target=board[destination] & MASK_COLOR;
+			
 			if(lcolor==lcolor_target)				//you cannot attack same color
 			{
 				//hold your attack, its our ally
@@ -269,13 +272,49 @@ int check_target_color(int piece_pos, int des_move)
 		return -1;
 	}else
 	{
-		return ( board[destination] & MASK_COLOR );
+		return ( tboard[destination] & MASK_COLOR );
 	}
 }
 
 bool check_pawn_move(int piece_pos, int des_move)
 {
+	int lpiece=board[piece_pos] & MASK_PIECE;
+	int lcolor=board[piece_pos] & MASK_COLOR;
+	int lcolor_target;
+	int lpiece_target;
 	
+	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
+	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
+	
+	//1. check boundary
+	if(destination==-1)
+	{
+		//out of bound
+		return false;
+	}else{
+		lcolor_target=tboard[destination] & MASK_COLOR;
+		lpiece_target=tboard[destination] & MASK_PIECE;
+		if((des_move==10)||(des_move==-10))
+		{
+			if(lpiece_target == 0)	//2. check if empty
+			{
+				return true;
+			}else
+			{
+				return false;
+			}
+		}
+		if((des_move==9)||(des_move==-9)||(des_move==11)||(des_move==-11))
+		{
+			if( (lpiece_target != 0) && (lcolor_target!=lcolor))	//2. check if empty
+			{
+				return true;
+			}else
+			{
+				return false;
+			}
+		}
+	}
 }
 
 bool check_move_player(int piece_pos, int des_move)
@@ -296,6 +335,16 @@ int move_piece(int piece_pos, int des_move)
 	}else{
 		tboard[destination]=tpiece;
 		tboard[piece_pos]=EMPTY;
+		return 1;
+	}
+}
+
+void copy_board(int board_des[64], int board_src[64])
+{
+	int i;
+	for(i=0;i<64;i++)
+	{
+		board_des[i]=board_src[i];
 	}
 }
 
