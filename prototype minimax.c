@@ -258,7 +258,7 @@ bool check_move(int piece_pos, int des_move)
 }
 
 //check if its empty and have different color, return true if they have different color
-int check_target_color(int piece_pos, int des_move)
+bool check_target_color(int piece_pos, int des_move)
 {
 	int lpiece=tboard[piece_pos] & MASK_PIECE;
 	int lcolor=tboard[piece_pos] & MASK_COLOR;
