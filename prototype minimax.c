@@ -48,6 +48,7 @@ int  board[64];
 int tboard[64];
 int history_board[64][64];
 
+
 bool slide[7] = {
 	FALSE,FALSE, FALSE, TRUE, TRUE, TRUE, FALSE
 };
@@ -102,6 +103,16 @@ int mailbox64[64] = {
 	91, 92, 93, 94, 95, 96, 97, 98
 };
 
+int castling_white_left[2]  = {  5,  6};
+int castling_white_right[3] = {  1,  2, 3};
+int castling_black_left[3]  = { 57, 58, 59};
+int castling_black_right[2] = { 61, 62};
+
+bool bWhiteAllowCastling=true;
+bool bBlackAllowCastling=true;
+bool bWhiteCheck=false;
+bool bBlackCheck=false;
+
 int evaluate()
 {
 	int i;
@@ -154,7 +165,7 @@ int maxi( int depth, bool maximize ) {
 						des_move = movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; for BLACK */
 						if(check_pawn_move(i,des_move)
 						{
-							move_piece(i,des_move);
+							move_pawn(i,des_move);
 							score = maxi( depth - 1, false );        
 							if( score > max ) max = score;
 							tboard=history_board[depth];
@@ -188,8 +199,16 @@ int maxi( int depth, bool maximize ) {
 							if( score > max ) max = score;
 							tboard=history_board[depth];				//return board
 						
-						}while(slide[lpiece]);					
+						}while(slide[lpiece]);
+						
 					}
+					//castling move white
+					/*
+					if(lpiece==KING)
+					{
+						
+					}
+					*/
 				}
 			}
 		}
@@ -338,6 +357,7 @@ bool check_move_player(int piece_pos, int des_move)
 	
 }
 
+//return destination array
 int move_piece(int piece_pos, int des_move)
 {
 	int tpiece=tboard[piece_pos];
@@ -351,7 +371,40 @@ int move_piece(int piece_pos, int des_move)
 	}else{
 		tboard[destination]=tpiece;
 		tboard[piece_pos]=EMPTY;
-		return 1;
+		return destination;
+	}
+}
+
+//special move for pawn (including queen promotion)
+int move_pawn(int piece_pos, int des_move)
+{
+	int tpiece=tboard[piece_pos];
+	int lcolor=board[piece_pos] & MASK_COLOR;
+	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
+	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
+	
+	if(destination==-1)
+	{
+		//out of bound
+		return -1;
+	}else{
+		tboard[piece_pos]=EMPTY;
+		tboard[destination]=tpiece;
+		if(lcolor==COLOR_BLACK)
+		{
+			if(destination<8)
+			{
+				tboard[destination]=QUEEN+COLOR_BLACK;//color white=0, so queen+color white=5+0 :P
+			}
+		}
+		if(lcolor==COLOR_WHITE)
+		{
+			if(destination>55)
+			{
+				tboard[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
+			}
+		}		
+		return destination;
 	}
 }
 
