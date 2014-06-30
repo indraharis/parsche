@@ -108,10 +108,16 @@ int castling_white_right[3] = {  1,  2, 3};
 int castling_black_left[3]  = { 57, 58, 59};
 int castling_black_right[2] = { 61, 62};
 
-bool bWhiteAllowCastling=true;
-bool bBlackAllowCastling=true;
+bool bWhiteAllowCastlingL=true;
+bool bWhiteAllowCastlingR=true;
+bool bBlackAllowCastlingL=true;
+bool bBlackAllowCastlingR=true;
+
 bool bWhiteCheck=false;
 bool bBlackCheck=false;
+
+int start_pos_move;
+int des_pos_move;
 
 int evaluate()
 {
@@ -152,8 +158,8 @@ int maxi( int depth, bool maximize ) {
 	{
         max = -V_MAX;
 		
-		history_board[depth]=tboard;		//record history (of three kingdom)
-		for ( i=0; i<64; i++ ) {			//scan board
+		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
+		for ( i=0; i<64; i++ ) {						//scan board
 			lpiece = tboard[i] & MASK_PIECE;
 			lcolor = tboard[i] & MASK_COLOR;
 			if(( lpiece != EMPTY) && ( lcolor == COLOR_WHITE))
@@ -162,20 +168,25 @@ int maxi( int depth, bool maximize ) {
 				{
 					for ( n_move = 0; n_move < 3; n_move++ )
 					{
-						des_move = movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; for BLACK */
+						des_move = movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; if its BLACK */
 						if(check_pawn_move(i,des_move)
 						{
 							move_pawn(i,des_move);
 							score = maxi( depth - 1, false );        
-							if( score > max ) max = score;
-							tboard=history_board[depth];
+							if(score>max)
+								{
+									max=score;
+									start_pos_move=i;
+									des_pos_move=des_move;
+								}
+							copy_board(tboard, history_board[depth]);
 						}
 					}
 					
 				}else
 				{
-					for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ ) {	
-					
+					for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ ) 
+					{						
 						des_move=0;
 						do
 						{
@@ -189,24 +200,37 @@ int maxi( int depth, bool maximize ) {
 							{
 								move_piece(i,des_move);
 								score = maxi( depth - 1, false );        
-								if( score > max ) max = score;
-								tboard=history_board[depth];			//return board
-								break;									//stop
+								if(score>max)
+								{
+									max=score;
+									start_pos_move=i;
+									des_pos_move=des_move;
+								}
+								copy_board(tboard, history_board[depth]);	//return board
+								break;										//stop
 							}
 						
 							move(i,des_move);
-							score = maxi( depth - 1, false );        
-							if( score > max ) max = score;
-							tboard=history_board[depth];				//return board
+							score = maxi( depth - 1, false );
+							if(score>max)
+								{
+									max=score;
+									start_pos_move=i;
+									des_pos_move=des_move;
+								}
+							copy_board(tboard, history_board[depth]);		//return board
 						
 						}while(slide[lpiece]);
 						
 					}
 					//castling move white
 					/*
-					if(lpiece==KING)
+					if((lpiece==KING)&&(bWhiteAllowCastlingL)&&(bWhiteAllowCastlingR))
 					{
+						for()
+						{
 						
+						}
 					}
 					*/
 				}
@@ -405,6 +429,28 @@ int move_pawn(int piece_pos, int des_move)
 			}
 		}		
 		return destination;
+	}
+}
+
+int find_max(int value_a, int value_b)
+{
+	if(value_a>value_b)
+	{
+		return value_a;
+	}else
+	{
+		return value_b;
+	}
+}
+
+int find_min(int value_a, int value_b)
+{
+	if(value_a<=value_b)
+	{
+		return value_a;
+	}else
+	{
+		return value_b;
 	}
 }
 
