@@ -171,7 +171,7 @@ int maxi( int depth, bool maximize ) {
 						des_move = movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; if its BLACK */
 						if(check_pawn_move(i,des_move)
 						{
-							move_pawn(i,des_move);
+							move_pseudo_pawn(i,des_move);
 							score = maxi( depth - 1, false );        
 							if(score>max)
 								{
@@ -198,7 +198,7 @@ int maxi( int depth, bool maximize ) {
 						
 							if(check_target_color(i,des_move))	//if capture
 							{
-								move_piece(i,des_move);
+								move_pseudo_piece(i,des_move);
 								score = maxi( depth - 1, false );        
 								if(score>max)
 								{
@@ -210,7 +210,7 @@ int maxi( int depth, bool maximize ) {
 								break;										//stop
 							}
 						
-							move(i,des_move);
+							move_pseudo_piece(i,des_move);
 							score = maxi( depth - 1, false );
 							if(score>max)
 								{
@@ -279,8 +279,8 @@ bool check_move(int piece_pos, int des_move)
 		//out of bound
 		return false;
 	}else{
-		lcolor_target = board[destination] & MASK_COLOR;
-		lpiece_target = board[destination] & MASK_PIECE;
+		lcolor_target = tboard[destination] & MASK_COLOR;
+		lpiece_target = tboard[destination] & MASK_PIECE;
 		if(lpiece_target) == EMPTY)	//2. check if empty
 		{
 			return true;
@@ -382,6 +382,58 @@ bool check_move_player(int piece_pos, int des_move)
 }
 
 //return destination array
+int move_pseudo_piece(int piece_pos, int des_move)
+{
+	int tpiece=tboard[piece_pos];
+	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
+	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
+	
+	if(destination==-1)
+	{
+		//out of bound
+		return -1;
+	}else{
+		tboard[destination]=tpiece;
+		tboard[piece_pos]=EMPTY;
+		return destination;
+	}
+}
+
+//special move for pawn (including queen promotion)
+int move_pseudo_pawn(int piece_pos, int des_move)
+{
+	int tpiece=tboard[piece_pos];
+	int lcolor=board[piece_pos] & MASK_COLOR;
+	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
+	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
+	
+	if(destination==-1)
+	{
+		//out of bound
+		return -1;
+	}else{
+		tboard[piece_pos]=EMPTY;
+		tboard[destination]=tpiece;
+		if(lcolor==COLOR_BLACK)
+		{
+			if(destination<8)
+			{
+				tboard[destination]=QUEEN+COLOR_BLACK;//color white=0, so queen+color white=5+0 :P
+			}
+		}
+		if(lcolor==COLOR_WHITE)
+		{
+			if(destination>55)
+			{
+				tboard[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
+			}
+		}		
+		return destination;
+	}
+}
+
+
+//return destination array
 int move_piece(int piece_pos, int des_move)
 {
 	int tpiece=tboard[piece_pos];
@@ -466,7 +518,23 @@ void copy_board(int board_des[64], int board_src[64])
 //its just dummy main function
 int not_main()
 {
-	
+	copy_board(board,init_board);
+	while(true)
+	{
+		if(ply&1==0)//white one
+		{
+			//input
+			//check
+			//execute
+			ply++;
+		}else
+		{
+			copy_board(tboard,board);
+			maximize(2,false);
+			move_piece(start_pos_move, des_pos_move);
+			ply++;
+		}
+	}
 }
 /* //from wiki-wikipedia
 function minimax(node, depth, maximizingPlayer)
