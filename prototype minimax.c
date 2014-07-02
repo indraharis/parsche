@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
 #define V_NULL		0
 #define V_PAWN		100
 #define V_KNIGHT	300
@@ -27,13 +31,13 @@
 	1  = white pawn
 	9  = black pawn
 	10 = black knight
-	dst	
+	dst
 */
 
 //array 0 for dummy
 int ply;
 int depthply;
-int init_board[64]={ 
+int init_board[64]={
 	4, 2, 3, 5, 6, 3, 2, 4,
 	1, 1, 1, 1, 1, 1, 1, 1,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -43,14 +47,14 @@ int init_board[64]={
     9, 9, 9, 9, 9, 9, 9, 9,
 12,10,11,13,14,11,10,12
    };
-   
+
 int  board[64];
 int tboard[64];
 int history_board[64][64];
 
 
 bool slide[7] = {
-	FALSE,FALSE, FALSE, TRUE, TRUE, TRUE, FALSE
+	false, false, false, true, true, true, false
 };
 
 int number_of_move[7] = {
@@ -58,15 +62,15 @@ int number_of_move[7] = {
 };
 
 int pieces_value[7] = {
-	V_NULL, 
-	V_PAWN, 
-	V_KNIGHT, 
-	V_BISHOP, 
-	V_ROOK, 
-	V_QUEEN, 
+	V_NULL,
+	V_PAWN,
+	V_KNIGHT,
+	V_BISHOP,
+	V_ROOK,
+	V_QUEEN,
 	V_KING
 	};
-	
+
 int movement[7][8] = {
 	{   0,   0,   0,  0,  0,  0,  0,  0 },	//dummy
 	{   10,  9,  11,  0,-10, -9,-11,  0 },	//creep
@@ -119,16 +123,31 @@ bool bBlackCheck=false;
 int start_pos_move;
 int des_pos_move;
 
+int evaluate();
+int maxi( int depth, bool maximize );
+bool check_move(int piece_pos, int des_move);
+bool check_target_color(int piece_pos, int des_move);
+bool check_pawn_move(int piece_pos, int des_move);
+bool check_move_player(int piece_pos, int des_move);
+int move_pseudo_piece(int piece_pos, int des_move);
+int move_pseudo_pawn(int piece_pos, int des_move);
+int move_piece(int piece_pos, int des_move);
+int move_pawn(int piece_pos, int des_move);
+
+void copy_board(int board_des[64], int board_src[64]);
+void display(int bd[64]);
+int not_main();
+
 int evaluate()
 {
 	int i;
 	int total=0;
 	int lpiece;
 	int lcolor;
-	
+
 	for(i=0;i<64;i++)
 	{
-	
+
 		lpiece = board[i] & MASK_PIECE;
 		lcolor = board[i] & MASK_COLOR;
 		if(lcolor == COLOR_WHITE)
@@ -157,7 +176,7 @@ int maxi( int depth, bool maximize ) {
 	if ( maximize )
 	{
         max = -V_MAX;
-		
+
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
 		for ( i=0; i<64; i++ ) {						//scan board
 			lpiece = tboard[i] & MASK_PIECE;
@@ -169,10 +188,10 @@ int maxi( int depth, bool maximize ) {
 					for ( n_move = 0; n_move < 3; n_move++ )
 					{
 						des_move = movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; if its BLACK */
-						if(check_pawn_move(i,des_move)
+						if(check_pawn_move(i,des_move))
 						{
 							move_pseudo_pawn(i,des_move);
-							score = maxi( depth - 1, false );        
+							score = maxi( depth - 1, false );
 							if(score>max)
 								{
 									max=score;
@@ -182,11 +201,11 @@ int maxi( int depth, bool maximize ) {
 							copy_board(tboard, history_board[depth]);
 						}
 					}
-					
+
 				}else
 				{
-					for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ ) 
-					{						
+					for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ )
+					{
 						des_move=0;
 						do
 						{
@@ -195,11 +214,11 @@ int maxi( int depth, bool maximize ) {
 							{
 								break;
 							}
-						
+
 							if(check_target_color(i,des_move))	//if capture
 							{
 								move_pseudo_piece(i,des_move);
-								score = maxi( depth - 1, false );        
+								score = maxi( depth - 1, false );
 								if(score>max)
 								{
 									max=score;
@@ -209,7 +228,7 @@ int maxi( int depth, bool maximize ) {
 								copy_board(tboard, history_board[depth]);	//return board
 								break;										//stop
 							}
-						
+
 							move_pseudo_piece(i,des_move);
 							score = maxi( depth - 1, false );
 							if(score>max)
@@ -219,9 +238,9 @@ int maxi( int depth, bool maximize ) {
 									des_pos_move=des_move;
 								}
 							copy_board(tboard, history_board[depth]);		//return board
-						
+
 						}while(slide[lpiece]);
-						
+
 					}
 					//castling move white
 					/*
@@ -229,31 +248,100 @@ int maxi( int depth, bool maximize ) {
 					{
 						for()
 						{
-						
+
 						}
 					}
 					*/
 				}
 			}
 		}
-		
+		display(tboard);
+        printf("\nvalue %d \n ",max);
 		return max;
 	}else
 	{
-		/*
-		max = V_MAX;
-		history_board[depth]=board;	
-		
-		for ( i=0; i<64; i++ ) {	//scan board
-			for(all moves) 
+        max = V_MAX;
+
+		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
+		for ( i=0; i<64; i++ ) {						//scan board
+			lpiece = tboard[i] & MASK_PIECE;
+			lcolor = tboard[i] & MASK_COLOR;
+			if(( lpiece != EMPTY) && ( lcolor == COLOR_BLACK))
 			{
-				move(pawn,moves);
-				score = maxi( depth - 1, true );
-				if( score < max ) max = score;
-				board=history_board[depth];
+				if(lpiece==PAWN)
+				{
+					for ( n_move = 0; n_move < 3; n_move++ )
+					{
+						des_move = -movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; if its BLACK */
+						if(check_pawn_move(i,des_move))
+						{
+							move_pseudo_pawn(i,des_move);
+							score = maxi( depth - 1, true );
+							if(score<max)
+								{
+									max=score;
+									start_pos_move=i;
+									des_pos_move=des_move;
+								}
+							copy_board(tboard, history_board[depth]);
+						}
+					}
+
+				}else
+				{
+					for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ )
+					{
+						des_move=0;
+						do
+						{
+							des_move=des_move+movement[lpiece][n_move];
+							if(!check_move(i,des_move))
+							{
+								break;
+							}
+
+							if(check_target_color(i,des_move))	//if capture
+							{
+								move_pseudo_piece(i,des_move);
+								score = maxi( depth - 1, true );
+								if(score<max)
+								{
+									max=score;
+									start_pos_move=i;
+									des_pos_move=des_move;
+								}
+								copy_board(tboard, history_board[depth]);	//return board
+								break;										//stop
+							}
+
+							move_pseudo_piece(i,des_move);
+							score = maxi( depth - 1, true );
+							if(score<max)
+								{
+									max=score;
+									start_pos_move=i;
+									des_pos_move=des_move;
+								}
+							copy_board(tboard, history_board[depth]);		//return board
+
+						}while(slide[lpiece]);
+
+					}
+					//castling move white
+					/*
+					if((lpiece==KING)&&(bWhiteAllowCastlingL)&&(bWhiteAllowCastlingR))
+					{
+						for()
+						{
+
+						}
+					}
+					*/
+				}
 			}
-		}*/		
-		
+		}
+		display(tboard);
+        printf("\nvalue %d \n ",max);
 		return max;
 	}
 }
@@ -262,7 +350,7 @@ int maxi( int depth, bool maximize ) {
 	1. check if out of bound
 	2. check if empty
 	3. check friendly piece
- 
+
  */
 bool check_move(int piece_pos, int des_move)
 {
@@ -270,10 +358,10 @@ bool check_move(int piece_pos, int des_move)
 	int lcolor=board[piece_pos] & MASK_COLOR;
 	int lcolor_target;
 	int lpiece_target;
-	
+
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
-	
+
 	//1. check boundary
 	if(destination==-1)
 	{
@@ -282,12 +370,12 @@ bool check_move(int piece_pos, int des_move)
 	}else{
 		lcolor_target = tboard[destination] & MASK_COLOR;
 		lpiece_target = tboard[destination] & MASK_PIECE;
-		if(lpiece_target) == EMPTY)	//2. check if empty
+		if((lpiece_target) == EMPTY)	//2. check if empty
 		{
 			return true;
 		}else										//3. if not empty, check their color
 		{
-			
+
 			if(lcolor==lcolor_target)				//you cannot attack same color
 			{
 				//hold your attack, its our ally
@@ -298,7 +386,7 @@ bool check_move(int piece_pos, int des_move)
 				return true;
 			}
 		}
-	}	
+	}
 }
 
 //check if its empty and have different color, return true if they have different color
@@ -308,10 +396,10 @@ bool check_target_color(int piece_pos, int des_move)
 	int lcolor=tboard[piece_pos] & MASK_COLOR;
 	int lpiece_target;
 	int lcolor_target;
-	
+
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
-	
+
 	if(destination==-1)
 	{
 		//out of bound,return -1
@@ -342,10 +430,10 @@ bool check_pawn_move(int piece_pos, int des_move)
 	int lcolor=board[piece_pos] & MASK_COLOR;
 	int lcolor_target;
 	int lpiece_target;
-	
+
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
-	
+
 	//1. check boundary
 	if(destination==-1)
 	{
@@ -379,7 +467,7 @@ bool check_pawn_move(int piece_pos, int des_move)
 
 bool check_move_player(int piece_pos, int des_move)
 {
-	
+
 }
 
 //return destination array
@@ -388,7 +476,7 @@ int move_pseudo_piece(int piece_pos, int des_move)
 	int tpiece=tboard[piece_pos];
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
-	
+
 	if(destination==-1)
 	{
 		//out of bound
@@ -407,7 +495,7 @@ int move_pseudo_pawn(int piece_pos, int des_move)
 	int lcolor=board[piece_pos] & MASK_COLOR;
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
-	
+
 	if(destination==-1)
 	{
 		//out of bound
@@ -428,7 +516,7 @@ int move_pseudo_pawn(int piece_pos, int des_move)
 			{
 				tboard[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
 			}
-		}		
+		}
 		return destination;
 	}
 }
@@ -440,7 +528,7 @@ int move_piece(int piece_pos, int des_move)
 	int tpiece=tboard[piece_pos];
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
-	
+
 	if(destination==-1)
 	{
 		//out of bound
@@ -459,7 +547,7 @@ int move_pawn(int piece_pos, int des_move)
 	int lcolor=board[piece_pos] & MASK_COLOR;
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
-	
+
 	if(destination==-1)
 	{
 		//out of bound
@@ -480,7 +568,7 @@ int move_pawn(int piece_pos, int des_move)
 			{
 				tboard[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
 			}
-		}		
+		}
 		return destination;
 	}
 }
@@ -515,14 +603,29 @@ void copy_board(int board_des[64], int board_src[64])
 		board_des[i]=board_src[i];
 	}
 }
-
+void display(int bd[64])
+{
+	int i;
+	for(i=0;i<64;i++)
+	{
+	    if(bd[i]==0)
+	    {
+	        printf(" .");
+	    }else
+	    {
+	        printf(" %c",bd[i]+'a');
+	    }
+		if ((i + 1) % 8 == 0 && i != 63)
+			printf("\n ");
+	}
+}
 //its just dummy main function
 int not_main()
 {
 	copy_board(board,init_board);
 	while(true)
 	{
-		if(ply&1==0)//white one
+		if(ply%2==0)//white one
 		{
 			//input
 			//check
@@ -531,7 +634,7 @@ int not_main()
 		}else
 		{
 			copy_board(tboard,board);
-			maximize(2,false);
+			maxi(3,false);
 			move_piece(start_pos_move, des_pos_move);
 			ply++;
 		}
@@ -553,4 +656,12 @@ function minimax(node, depth, maximizingPlayer)
             val := minimax(child, depth - 1, TRUE)
             bestValue := min(bestValue, val)
         return bestValue
+*/
+/*
+int main()
+{
+    not_main();
+    printf("Hello world!\n");
+    return 0;
+}
 */
