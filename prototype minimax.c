@@ -41,7 +41,7 @@ int init_board[64]={
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
     9, 9, 9, 9, 9, 9, 9, 9,
-   12,10,11,13,14,11,10,12
+	12,10,11,13,14,11,10,12
    };
    
 int  board[64];
@@ -244,8 +244,9 @@ int maxi( int depth, bool maximize ) {
 		max = V_MAX;
 		history_board[depth]=board;	
 		
-		for ( i=0; i<64; i++ ) {	//scan beard
-			for( all moves) {
+		for ( i=0; i<64; i++ ) {	//scan board
+			for(all moves) 
+			{
 				move(pawn,moves);
 				score = maxi( depth - 1, true );
 				if( score < max ) max = score;
