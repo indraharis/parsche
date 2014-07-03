@@ -45,7 +45,18 @@ int init_board[64]={
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
     9, 9, 9, 9, 9, 9, 9, 9,
-12,10,11,13,14,11,10,12
+    12,10,11,13,14,11,10,12
+   };
+
+int false_init_board[64]={
+	4, 2, 3, 5, 6, 3, 0, 4,
+	1, 0, 1, 1, 0, 1, 1, 1,
+	0, 1, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 3, 0, 0, 1, 0, 2, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    12,10,11,13,14,11,10,12
    };
 
 int  board[64];
@@ -175,6 +186,7 @@ int maxi( int depth, bool maximize ) {
     if ( depth <= 0 ) return evaluate();
 	if ( maximize )
 	{
+	    printf("depth %d\n ",depth);
         max = -V_MAX;
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
@@ -255,11 +267,13 @@ int maxi( int depth, bool maximize ) {
 				}
 			}
 		}
-		display(tboard);
+
+		printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
         printf("\nvalue %d \n ",max);
 		return max;
 	}else
 	{
+	    printf("depth %d\n ",depth);
         max = V_MAX;
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
@@ -324,6 +338,7 @@ int maxi( int depth, bool maximize ) {
 								}
 							copy_board(tboard, history_board[depth]);		//return board
 
+
 						}while(slide[lpiece]);
 
 					}
@@ -340,7 +355,8 @@ int maxi( int depth, bool maximize ) {
 				}
 			}
 		}
-		display(tboard);
+
+		printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
         printf("\nvalue %d \n ",max);
 		return max;
 	}
@@ -408,7 +424,7 @@ bool check_target_color(int piece_pos, int des_move)
 	{
 		lpiece_target=tboard[destination] & MASK_PIECE;
 		lcolor_target=tboard[destination] & MASK_COLOR;
-		if(lpiece==EMPTY)
+		if(lpiece_target==EMPTY)
 		{
 			return false;
 		}else
@@ -484,6 +500,10 @@ int move_pseudo_piece(int piece_pos, int des_move)
 	}else{
 		tboard[destination]=tpiece;
 		tboard[piece_pos]=EMPTY;
+
+		printf("\nmove %d to %d\n ",piece_pos,des_move);
+        display(tboard);
+
 		return destination;
 	}
 }
@@ -517,6 +537,8 @@ int move_pseudo_pawn(int piece_pos, int des_move)
 				tboard[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
 			}
 		}
+		printf("\nmove %d to %d\n ",piece_pos,des_move);
+        display(tboard);
 		return destination;
 	}
 }
@@ -534,8 +556,8 @@ int move_piece(int piece_pos, int des_move)
 		//out of bound
 		return -1;
 	}else{
-		tboard[destination]=tpiece;
-		tboard[piece_pos]=EMPTY;
+		board[destination]=tpiece;
+		board[piece_pos]=EMPTY;
 		return destination;
 	}
 }
@@ -553,20 +575,20 @@ int move_pawn(int piece_pos, int des_move)
 		//out of bound
 		return -1;
 	}else{
-		tboard[piece_pos]=EMPTY;
-		tboard[destination]=tpiece;
+	    board[destination]=tpiece;
+		board[piece_pos]=EMPTY;
 		if(lcolor==COLOR_BLACK)
 		{
 			if(destination<8)
 			{
-				tboard[destination]=QUEEN+COLOR_BLACK;//color white=0, so queen+color white=5+0 :P
+				board[destination]=QUEEN+COLOR_BLACK;//color white=0, so queen+color white=5+0 :P
 			}
 		}
 		if(lcolor==COLOR_WHITE)
 		{
 			if(destination>55)
 			{
-				tboard[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
+				board[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
 			}
 		}
 		return destination;
@@ -622,7 +644,7 @@ void display(int bd[64])
 //its just dummy main function
 int not_main()
 {
-	copy_board(board,init_board);
+	copy_board(board,false_init_board);
 	while(true)
 	{
 		if(ply%2==0)//white one
@@ -633,9 +655,12 @@ int not_main()
 			ply++;
 		}else
 		{
-			copy_board(tboard,board);
-			maxi(3,false);
-			move_piece(start_pos_move, des_pos_move);
+
+                copy_board(tboard,board);
+                maxi(1,false);
+                move_piece(start_pos_move, des_pos_move);
+                display(board);
+
 			ply++;
 		}
 	}
