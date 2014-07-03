@@ -53,9 +53,9 @@ int false_init_board[64]={
 	1, 0, 1, 1, 0, 1, 1, 1,
 	0, 1, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 3, 0, 0, 1, 0, 2, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
+	0, 3, 0, 0, 1, 9, 2, 0,
+	0, 0, 9, 0, 0, 0, 9, 0,
+    9, 9, 0, 9, 9, 0, 0, 9,
     12,10,11,13,14,11,10,12
    };
 
@@ -547,7 +547,7 @@ int move_pseudo_pawn(int piece_pos, int des_move)
 //return destination array
 int move_piece(int piece_pos, int des_move)
 {
-	int tpiece=tboard[piece_pos];
+	int tpiece=board[piece_pos];
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
 
@@ -565,7 +565,7 @@ int move_piece(int piece_pos, int des_move)
 //special move for pawn (including queen promotion)
 int move_pawn(int piece_pos, int des_move)
 {
-	int tpiece=tboard[piece_pos];
+	int tpiece=board[piece_pos];
 	int lcolor=board[piece_pos] & MASK_COLOR;
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
@@ -655,12 +655,16 @@ int not_main()
 			ply++;
 		}else
 		{
-
+		    if(ply<3)
+            {
+                move_piece(52,-10);
+            }else
+            {
                 copy_board(tboard,board);
                 maxi(1,false);
                 move_piece(start_pos_move, des_pos_move);
                 display(board);
-
+            }
 			ply++;
 		}
 	}
@@ -682,11 +686,9 @@ function minimax(node, depth, maximizingPlayer)
             bestValue := min(bestValue, val)
         return bestValue
 */
-/*
 int main()
 {
     not_main();
     printf("Hello world!\n");
     return 0;
 }
-*/
