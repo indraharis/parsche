@@ -140,6 +140,7 @@ bool check_move(int piece_pos, int des_move);
 bool check_target_color(int piece_pos, int des_move);
 bool check_pawn_move(int piece_pos, int des_move);
 bool check_move_player(int piece_pos, int des_move);
+int move_player_piece(int piece_pos, int des_move);
 int move_pseudo_piece(int piece_pos, int des_move);
 int move_pseudo_pawn(int piece_pos, int des_move);
 int move_piece(int piece_pos, int des_move);
@@ -481,9 +482,97 @@ bool check_pawn_move(int piece_pos, int des_move)
 	}
 }
 
-bool check_move_player(int piece_pos, int des_move)
+int move_player_piece(int piece_pos, int des_move)
 {
+    board[des_move]=board[piece_pos];
+	board[piece_pos]=EMPTY;
+    return 0;
+}
 
+bool check_move_player(int player_start, int player_des)
+{
+	int i,j,k;
+	int mail_start, mail_des, mail_diff;
+	bool m_match=false;
+	int m_obstacle_count=0;		//match count
+	int lpiece=board[player_start] & MASK_PIECE;
+	int lcolor=board[player_start] & MASK_COLOR;
+	int lpiece_target=board[player_des] & MASK_PIECE;
+	int lcolor_target=board[player_des] & MASK_COLOR;
+	int	lpiece_check;
+
+	//check piece
+	if(lpiece==EMPTY)
+		{ return false;}
+	if(lcolor!=COLOR_WHITE)
+		{ return false;}
+
+	//check boundary
+	if((player_start<0) || (player_start>63))
+		{ return false;}
+	if((player_des<0) || (player_des>63))
+		{ return false;}
+	//check destination
+	if((lpiece_target!=EMPTY)&&(lcolor_target==COLOR_WHITE))
+		{ return false;}
+
+	//check movement rule
+	mail_start = mailbox64[player_start];
+	mail_des = mailbox64[player_des];
+	mail_diff = mail_des - mail_start;
+
+    printf("\n%d %d %d\n",mail_start,mail_des,mail_diff);
+	if(lpiece==PAWN)
+	{
+        if((mail_diff==9)||(mail_diff==11))
+        {
+            if(lpiece_target==EMPTY)
+            { return false;}
+            else
+            {
+                if(lcolor_target==COLOR_WHITE)
+                { return false;}
+                else
+                {
+                     return true;
+                }
+            }
+        }
+        if(mail_diff==10)
+        {
+            if(lpiece_target==EMPTY)
+            {
+                return true;
+            }
+        }
+        return false;
+	}
+
+	for(i=0;i<number_of_move[lpiece];i++)
+	{
+
+		if((mail_diff%movement[lpiece][i])==0)
+		{
+			m_match=true;
+			break;
+		}
+	}
+
+	if(m_match==false)
+		{ return false;}
+	else
+	{
+		return true;
+		/*
+		if(slide[lpiece])
+		{
+			for(j=mail_start; j<mail_des; j=j+movement[lpiece][i])
+			{
+				if(j!=mail_start
+			}
+		}
+		*/
+	}
 }
 
 //return destination array
@@ -628,6 +717,7 @@ void copy_board(int board_des[64], int board_src[64])
 void display(int bd[64])
 {
 	int i;
+	printf(" ");
 	for(i=0;i<64;i++)
 	{
 	    if(bd[i]==0)
@@ -644,15 +734,29 @@ void display(int bd[64])
 //its just dummy main function
 int not_main()
 {
-	copy_board(board,false_init_board);
+    int c1,c2;
+	copy_board(board,init_board);
 	while(true)
 	{
 		if(ply%2==0)//white one
 		{
 			//input
 			//check
-			//execute
-			ply++;
+			//if(check)
+			//-execute
+			//-ply++
+			display(board);
+			printf("\n input your move ");
+			scanf("%d",&c1);scanf("%d",&c2);
+			if(check_move_player(c1,c2))
+            {
+                move_player_piece(c1,c2);
+                ply++;
+            }else
+            {
+                printf("\nOops!! illegal move, try again\n\n");
+            }
+
 		}else
 		{
 		    if(ply<3)
@@ -661,7 +765,7 @@ int not_main()
             }else
             {
                 copy_board(tboard,board);
-                maxi(1,false);
+                maxi(2,false);
                 move_piece(start_pos_move, des_pos_move);
                 display(board);
             }
