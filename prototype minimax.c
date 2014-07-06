@@ -137,6 +137,7 @@ int des_pos_move;
 FILE* fftest;
 
 int evaluate();
+int evaluatebd(int bd[64]);
 int maxi( int depth, bool maximize );
 bool check_move(int piece_pos, int des_move);
 bool check_target_color(int piece_pos, int des_move);
@@ -165,6 +166,29 @@ int evaluate()
 
 		lpiece = tboard[i] & MASK_PIECE;
 		lcolor = tboard[i] & MASK_COLOR;
+		if(lcolor == COLOR_WHITE)
+		{
+			total = total + pieces_value[lpiece];
+		}else
+		{
+			total = total - pieces_value[lpiece];
+		}
+	}
+	return total;
+}
+
+int evaluatebd(int bd[64])
+{
+	int i;
+	int total=0;
+	int lpiece;
+	int lcolor;
+
+	for(i=0;i<64;i++)
+	{
+
+		lpiece = bd[i] & MASK_PIECE;
+		lcolor = bd[i] & MASK_COLOR;
 		if(lcolor == COLOR_WHITE)
 		{
 			total = total + pieces_value[lpiece];
@@ -754,14 +778,14 @@ void printboard(int bd[64],FILE* tfile)
 			fprintf(tfile,"\n ");
 	}
 	fprintf(tfile,"\n");
-	fprintf(tfile,"value %d\n\n",evaluate());
+	fprintf(tfile,"temporary value %d\n\n",evaluate());
 }
 //its just dummy main function
 int not_main()
 {
     int c1,c2;
     bool gameover=false;
-    fftest=fopen("..\filetest.txt","w");
+    fftest=fopen("../filetest.txt","w");
     if(fftest==NULL) return -1;
 
 	copy_board(board,init_board);
@@ -803,13 +827,19 @@ int not_main()
             {
                 copy_board(tboard,board);
 
-                fprintf(fftest,"==============================================\n");
+                fprintf(fftest,"==================================================\n");
                 fprintf(fftest,"this is start at ply %d\n",ply);
                 printboard(board,fftest);
-                fprintf(fftest,"----------------------------------------------\n");
+                fprintf(fftest,"--------------------------------------------------\n");
 
                 maxi(2,false);
                 move_piece(start_pos_move, des_pos_move);
+
+                fprintf(fftest,"..................................................\n");
+                fprintf(fftest,"end of ply %d\nthe AI decision is:\n",ply);
+                printboard(board,fftest);
+                fprintf("\nvalue %d\n",evaluatebd(board));
+
                 display(board);
                 printf("\nvalue %d\n",evaluate());
             }
