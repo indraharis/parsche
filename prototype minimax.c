@@ -49,14 +49,14 @@ int init_board[64]={
    };
 
 int false_init_board[64]={
-	4, 2, 3, 5, 6, 3, 0, 4,
-	1, 0, 1, 1, 0, 1, 1, 1,
-	0, 1, 0, 0, 0, 0, 0, 0,
+	0, 4, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 3, 0, 0, 1, 9, 2, 0,
-	0, 0, 9, 0, 0, 0, 9, 0,
-    9, 9, 0, 9, 9, 0, 0, 9,
-    12,10,11,13,14,11,10,12
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0,13, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0
    };
 
 int  board[64];
@@ -184,6 +184,8 @@ int maxi( int depth, bool maximize ) {
 	int lpiece;
 	int lcolor;
 	int des_move; 	//destination move
+	int lbestpos;
+	int lbestmove;
     if ( depth <= 0 ) return evaluate();
 	if ( maximize )
 	{
@@ -208,8 +210,7 @@ int maxi( int depth, bool maximize ) {
 							if(score>max)
 								{
 									max=score;
-									start_pos_move=i;
-									des_pos_move=des_move;
+
 								}
 							copy_board(tboard, history_board[depth]);
 						}
@@ -235,8 +236,7 @@ int maxi( int depth, bool maximize ) {
 								if(score>max)
 								{
 									max=score;
-									start_pos_move=i;
-									des_pos_move=des_move;
+
 								}
 								copy_board(tboard, history_board[depth]);	//return board
 								break;										//stop
@@ -247,8 +247,7 @@ int maxi( int depth, bool maximize ) {
 							if(score>max)
 								{
 									max=score;
-									start_pos_move=i;
-									des_pos_move=des_move;
+
 								}
 							copy_board(tboard, history_board[depth]);		//return board
 
@@ -295,8 +294,8 @@ int maxi( int depth, bool maximize ) {
 							if(score<max)
 								{
 									max=score;
-									start_pos_move=i;
-									des_pos_move=des_move;
+									lbestpos=i;
+									lbestmove=des_move;
 								}
 							copy_board(tboard, history_board[depth]);
 						}
@@ -322,8 +321,8 @@ int maxi( int depth, bool maximize ) {
 								if(score<max)
 								{
 									max=score;
-									start_pos_move=i;
-									des_pos_move=des_move;
+									lbestpos=i;
+									lbestmove=des_move;
 								}
 								copy_board(tboard, history_board[depth]);	//return board
 								break;										//stop
@@ -334,8 +333,8 @@ int maxi( int depth, bool maximize ) {
 							if(score<max)
 								{
 									max=score;
-									start_pos_move=i;
-									des_pos_move=des_move;
+									lbestpos=i;
+									lbestmove=des_move;
 								}
 							copy_board(tboard, history_board[depth]);		//return board
 
@@ -357,6 +356,8 @@ int maxi( int depth, bool maximize ) {
 			}
 		}
 
+        start_pos_move=lbestpos;
+        des_pos_move=lbestmove;
 		printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
         printf("\nvalue %d \n ",max);
 		return max;
@@ -730,12 +731,13 @@ void display(int bd[64])
 		if ((i + 1) % 8 == 0 && i != 63)
 			printf("\n ");
 	}
+	printf("\n");
 }
 //its just dummy main function
 int not_main()
 {
     int c1,c2;
-	copy_board(board,init_board);
+	copy_board(board,false_init_board);
 	while(true)
 	{
 		if(ply%2==0)//white one
@@ -768,6 +770,7 @@ int not_main()
                 maxi(2,false);
                 move_piece(start_pos_move, des_pos_move);
                 display(board);
+                printf("\nvalue %d\n",evaluate());
             }
 			ply++;
 		}
