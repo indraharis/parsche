@@ -49,14 +49,14 @@ int init_board[64]={
    };
 
 int false_init_board[64]={
-	4, 2, 3, 5, 6, 3, 2, 4,
+	0, 0, 0, 0, 6, 0, 0, 0,
 	1, 1, 1, 1, 1, 1, 1, 1,
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 2, 0, 0, 5,
 	0, 0, 0, 0, 0, 0, 0, 0,
     9, 9, 9, 9, 9, 9, 9, 9,
-    12,10,11,13,14,11,10,12
+	0, 0, 0,13,14,11, 0, 0
    };
 
 int  board[64];
@@ -610,6 +610,8 @@ int move_pseudo_piece(int piece_pos, int des_move)
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
 
+
+    printf("\npos+move %d\ndestin %d\n ",mb_pos+des_move,destination);
 	if(destination==-1)
 	{
 		//out of bound
@@ -618,6 +620,7 @@ int move_pseudo_piece(int piece_pos, int des_move)
 		tboard[destination]=tpiece;
 		tboard[piece_pos]=EMPTY;
 
+        display(tboard);
 		printf("\nmove %d to %d\n ",piece_pos,des_move);
         printboard(tboard,fftest);
 
@@ -654,6 +657,7 @@ int move_pseudo_pawn(int piece_pos, int des_move)
 				tboard[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
 			}
 		}
+		display(tboard);
 		printf("\nmove %d to %d\n ",piece_pos,des_move);
         printboard(tboard,fftest);
 		return destination;
@@ -788,7 +792,7 @@ int not_main()
     fftest=fopen("../filetest.txt","w");
     if(fftest==NULL) return -1;
 
-	copy_board(board,init_board);
+	copy_board(board,false_init_board);
 	while(!gameover)
 	{
 		if(ply%2==0)//white one
