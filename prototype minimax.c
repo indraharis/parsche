@@ -49,14 +49,14 @@ int init_board[64]={
    };
 
 int false_init_board[64]={
-	0, 4, 0, 0, 0, 0, 0, 0,
+	4, 2, 3, 5, 6, 3, 2, 4,
+	1, 1, 1, 1, 1, 1, 1, 1,
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0,13, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0
+    9, 9, 9, 9, 9, 9, 9, 9,
+    12,10,11,13,14,11,10,12
    };
 
 int  board[64];
@@ -134,6 +134,8 @@ bool bBlackCheck=false;
 int start_pos_move;
 int des_pos_move;
 
+FILE* fftest;
+
 int evaluate();
 int maxi( int depth, bool maximize );
 bool check_move(int piece_pos, int des_move);
@@ -148,6 +150,7 @@ int move_pawn(int piece_pos, int des_move);
 
 void copy_board(int board_des[64], int board_src[64]);
 void display(int bd[64]);
+void printboard(int bd[64],FILE* tfile);
 int not_main();
 
 int evaluate()
@@ -160,8 +163,8 @@ int evaluate()
 	for(i=0;i<64;i++)
 	{
 
-		lpiece = board[i] & MASK_PIECE;
-		lcolor = board[i] & MASK_COLOR;
+		lpiece = tboard[i] & MASK_PIECE;
+		lcolor = tboard[i] & MASK_COLOR;
 		if(lcolor == COLOR_WHITE)
 		{
 			total = total + pieces_value[lpiece];
@@ -592,7 +595,7 @@ int move_pseudo_piece(int piece_pos, int des_move)
 		tboard[piece_pos]=EMPTY;
 
 		printf("\nmove %d to %d\n ",piece_pos,des_move);
-        display(tboard);
+        printboard(tboard,fftest);
 
 		return destination;
 	}
@@ -628,7 +631,7 @@ int move_pseudo_pawn(int piece_pos, int des_move)
 			}
 		}
 		printf("\nmove %d to %d\n ",piece_pos,des_move);
-        display(tboard);
+        printboard(tboard,fftest);
 		return destination;
 	}
 }
@@ -733,12 +736,36 @@ void display(int bd[64])
 	}
 	printf("\n");
 }
+
+void printboard(int bd[64],FILE* tfile)
+{
+	int i;
+	fprintf(tfile," ");
+	for(i=0;i<64;i++)
+	{
+	    if(bd[i]==0)
+	    {
+	        fprintf(tfile," .");
+	    }else
+	    {
+	        fprintf(tfile," %c",bd[i]+'a');
+	    }
+		if ((i + 1) % 8 == 0 && i != 63)
+			fprintf(tfile,"\n ");
+	}
+	fprintf(tfile,"\n");
+	fprintf(tfile,"value %d\n\n",evaluate());
+}
 //its just dummy main function
 int not_main()
 {
     int c1,c2;
-	copy_board(board,false_init_board);
-	while(true)
+    bool gameover=false;
+    fftest=fopen("..\filetest.txt","w");
+    if(fftest==NULL) return -1;
+
+	copy_board(board,init_board);
+	while(!gameover)
 	{
 		if(ply%2==0)//white one
 		{
@@ -749,7 +776,15 @@ int not_main()
 			//-ply++
 			display(board);
 			printf("\n input your move ");
-			scanf("%d",&c1);scanf("%d",&c2);
+			scanf("%d",&c1);
+			if(c1>=0)
+            {
+                scanf("%d",&c2);
+            }else
+            {
+                gameover=true;
+            }
+
 			if(check_move_player(c1,c2))
             {
                 move_player_piece(c1,c2);
@@ -767,6 +802,12 @@ int not_main()
             }else
             {
                 copy_board(tboard,board);
+
+                fprintf(fftest,"==============================================\n");
+                fprintf(fftest,"this is start at ply %d\n",ply);
+                printboard(board,fftest);
+                fprintf(fftest,"----------------------------------------------\n");
+
                 maxi(2,false);
                 move_piece(start_pos_move, des_pos_move);
                 display(board);
@@ -775,6 +816,7 @@ int not_main()
 			ply++;
 		}
 	}
+	fclose(fftest);
 }
 /* //from wiki-wikipedia
 function minimax(node, depth, maximizingPlayer)
