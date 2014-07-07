@@ -784,18 +784,6 @@ void printboard(int bd[64],FILE* tfile)
 	fprintf(tfile,"\n");
 	fprintf(tfile,"temporary value %d\n\n",evaluate());
 }
-int check_winning_player()
-{
-    int i;
-    int winner=0;
-
-    for(i=0;i<64;i++)
-    {
-        if(board[i]==KING)  winner++;
-        if(board[i]==COLOR_BLACK|KING)  winner--;
-    }
-    return winner;
-}
 int check_input(char* ch)
 {
     int tpos=-1, tdes=-1;
@@ -816,7 +804,6 @@ int not_main()
     char c1[16],c2;
     int tpos,tdes;
     int input_return;
-    int winner=0;
     bool gameover=false;
     fftest=fopen("../filetest.txt","w");
     if(fftest==NULL) return -1;
@@ -880,18 +867,6 @@ int not_main()
             }
 			ply++;
 		}
-		winner=check_winning_player();
-		if(winner!=0)
-        {
-            gameover=true;
-            if(winner==1)
-            {
-                printf("\n\nwinner is WHITE\n");
-            }else
-            {
-                printf("\n\nwinner is BLACK\n");
-            }
-        }
 	}
 	fclose(fftest);
 }
@@ -914,7 +889,7 @@ function minimax(node, depth, maximizingPlayer)
 */
 int main()
 {
-    not_main();
     printf("Hello world!\n");
+	not_main();    
     return 0;
 }
