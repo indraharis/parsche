@@ -784,15 +784,31 @@ void printboard(int bd[64],FILE* tfile)
 	fprintf(tfile,"\n");
 	fprintf(tfile,"temporary value %d\n\n",evaluate());
 }
+int check_input(char* ch)
+{
+    int tpos=-1, tdes=-1;
+    if((ch[0]<'a')||(ch[0]>'h')) return -1;
+    if((ch[1]<'1')||(ch[1]>'8')) return -1;
+    if((ch[2]<'a')||(ch[2]>'h')) return -1;
+    if((ch[3]<'1')||(ch[3]>'8')) return -1;
+
+    tpos=ch[0]-'a';
+    tpos=tpos+(ch[1]-'1')*8;
+    tdes=ch[2]-'a';
+    tdes=tdes+(ch[3]-'1')*8;
+    return (tpos<<6)|tdes;
+}
 //its just dummy main function
 int not_main()
 {
-    int c1,c2;
+    char c1[16],c2;
+    int tpos,tdes;
+    int input_return;
     bool gameover=false;
     fftest=fopen("../filetest.txt","w");
     if(fftest==NULL) return -1;
 
-	copy_board(board,init_board);
+	copy_board(board,false_init_board);
 	while(!gameover)
 	{
 		if(ply%2==0)//white one
@@ -804,22 +820,24 @@ int not_main()
 			//-ply++
 			display(board);
 			printf("\n input your move ");
-			scanf("%d",&c1);
-			if(c1>=0)
-            {
-                scanf("%d",&c2);
-            }else
-            {
-                gameover=true;
-            }
-
-			if(check_move_player(c1,c2))
-            {
-                move_player_piece(c1,c2);
-                ply++;
-            }else
+			scanf("%s",&c1);
+			input_return=check_input(c1);
+			if(input_return<0)
             {
                 printf("\nOops!! illegal move, try again\n\n");
+            }else
+            {
+                tpos=input_return>>6;
+                tdes=input_return&63;
+                printf("\nmove from %d to %d\n",tpos,tdes);
+                if(check_move_player(tpos,tdes))
+                {
+                    move_player_piece(tpos,tdes);
+                    ply++;
+                }else
+                {
+                    printf("\nOops!! illegal move, try again\n\n");
+                }
             }
 
 		}else
@@ -871,7 +889,7 @@ function minimax(node, depth, maximizingPlayer)
 */
 int main()
 {
-    not_main();
     printf("Hello world!\n");
+	not_main();    
     return 0;
 }
