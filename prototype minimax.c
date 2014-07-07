@@ -792,7 +792,7 @@ int not_main()
     fftest=fopen("../filetest.txt","w");
     if(fftest==NULL) return -1;
 
-	copy_board(board,false_init_board);
+	copy_board(board,init_board);
 	while(!gameover)
 	{
 		if(ply%2==0)//white one
