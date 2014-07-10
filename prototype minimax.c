@@ -10,7 +10,7 @@
 #define V_ROOK		500		//value of rook
 #define V_QUEEN		900		//value of queen
 #define V_KING		30000	//value of king
-#define V_MAX		900000	//value of maximum point
+#define V_MAX		900000	//maximum value of minimax
 
 // PIECE_CODE
 #define EMPTY			0
