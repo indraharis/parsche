@@ -2,14 +2,15 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define V_NULL		0
-#define V_PAWN		100
-#define V_KNIGHT	300
-#define V_BISHOP	325
-#define V_ROOK		500
-#define V_QUEEN		900
-#define V_KING		30000
-#define V_MAX		900000
+// PIECE_VALUE
+#define V_NULL		0		//value of null space
+#define V_PAWN		100		//value of pawn
+#define V_KNIGHT	300		//value of knight
+#define V_BISHOP	325		//value of bishop
+#define V_ROOK		500		//value of rook
+#define V_QUEEN		900		//value of queen
+#define V_KING		30000	//value of king
+#define V_MAX		900000	//value of maximum point
 
 // PIECE_CODE
 #define EMPTY			0
@@ -20,11 +21,11 @@
 #define QUEEN			5
 #define KING			6
 
-#define MASK_COLOR		8
-#define MASK_PIECE		7
+#define MASK_COLOR		8	//1000
+#define MASK_PIECE		7	//0111
 
-#define COLOR_WHITE		0
-#define COLOR_BLACK		8
+#define COLOR_WHITE		0	//0000
+#define COLOR_BLACK		8	//1000
 
 /*
 	piece = COLOR_X or PIECE_CODE
@@ -84,7 +85,7 @@ int pieces_value[7] = {
 
 int movement[7][8] = {
 	{   0,   0,   0,  0,  0,  0,  0,  0 },	//dummy
-	{   10,  9,  11,  0,-10, -9,-11,  0 },	//creep
+	{   10,  9,  11,  0,-10, -9,-11,  0 },	//pawn
 	{ -21, -19, -12, -8,  8, 12, 19, 21 },	//dullahan knight
 	{ -11,  -9,   9, 11,  0,  0,  0,  0 },	//bishop
 	{ -10,  -1,   1, 10,  0,  0,  0,  0 }, 	//barathum rook
@@ -123,13 +124,13 @@ int castling_white_right[3] = {  1,  2, 3};
 int castling_black_left[3]  = { 57, 58, 59};
 int castling_black_right[2] = { 61, 62};
 
-bool bWhiteAllowCastlingL=true;
-bool bWhiteAllowCastlingR=true;
-bool bBlackAllowCastlingL=true;
-bool bBlackAllowCastlingR=true;
+//bool bWhiteAllowCastlingL=true;
+//bool bWhiteAllowCastlingR=true;
+//bool bBlackAllowCastlingL=true;
+//bool bBlackAllowCastlingR=true;
 
-bool bWhiteCheck=false;
-bool bBlackCheck=false;
+//bool bWhiteCheck=false;
+//bool bBlackCheck=false;
 
 int start_pos_move;
 int des_pos_move;
@@ -208,10 +209,10 @@ int maxi( int depth, bool maximize ) {
 	int i;			//scan board
 	int n_move;		//number of move
 	int score;		//score for minimax
-	int lpiece;
-	int lcolor;
+	int lpiece;		//piece identification
+	int lcolor;		//color of piece
 	int des_move; 	//destination move
-	int lbestpos;
+	int lbestpos;	
 	int lbestmove;
     if ( depth <= 0 ) return evaluate();
 	if ( maximize )
@@ -418,10 +419,10 @@ bool check_move(int piece_pos, int des_move)
 		if((lpiece_target) == EMPTY)	//2. check if empty
 		{
 			return true;
-		}else										//3. if not empty, check their color
+		}else							//3. if not empty, check their color
 		{
 
-			if(lcolor==lcolor_target)				//you cannot attack same color
+			if(lcolor==lcolor_target)	//you cannot attack same color
 			{
 				//hold your attack, its our ally
 				return false;
