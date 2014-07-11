@@ -212,7 +212,7 @@ int maxi( int depth, bool maximize ) {
 	int lpiece;		//piece identification
 	int lcolor;		//color of piece
 	int des_move; 	//destination move
-	int lbestpos;	
+	int lbestpos;
 	int lbestmove;
     if ( depth <= 0 ) return evaluate();
 	if ( maximize )
@@ -793,7 +793,7 @@ int check_winning_player()
     for(i=0;i<64;i++)
     {
         if(board[i]==KING)  winner++;
-        if(board[i]==COLOR_BLACK|KING)  winner--;
+        if(board[i]==(COLOR_BLACK+KING))  winner--;
     }
     return winner;
 }
@@ -863,18 +863,19 @@ int not_main()
             {
                 copy_board(tboard,board);
 
-                fprintf(fftest,"==================================================\n");
-                fprintf(fftest,"this is start at ply %d\n",ply);
+//                fprintf(fftest,"==================================================\n");
+//                fprintf(fftest,"this is start at ply %d\n",ply);
                 printboard(board,fftest);
-                fprintf(fftest,"--------------------------------------------------\n");
+//                fprintf(fftest,"--------------------------------------------------\n");
 
                 maxi(2,false);
                 move_piece(start_pos_move, des_pos_move);
+                printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
 
-                fprintf(fftest,"..................................................\n");
-                fprintf(fftest,"end of ply %d\nthe AI decision is:\n",ply);
-                printboard(board,fftest);
-                fprintf("\nvalue %d\n",evaluatebd(board));
+//                fprintf(fftest,"..................................................\n");
+//                fprintf(fftest,"end of ply %d\nthe AI decision is:\n",ply);
+//                printboard(board,fftest);
+//                fprintf("\nvalue %d\n",evaluatebd(board));
 
                 display(board);
                 printf("\nvalue %d\n",evaluate());
