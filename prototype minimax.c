@@ -51,12 +51,12 @@ int init_board[64]={
 
 int false_init_board[64]={
 	0, 0, 0, 0, 6, 0, 0, 0,
-	1, 1, 1, 1, 1, 1, 1, 1,
+	0, 9, 1, 1, 1, 1, 1, 9,
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 2, 0, 0, 5,
 	0, 0, 0, 0, 0, 0, 0, 0,
-    9, 9, 9, 9, 9, 9, 9, 9,
+    1, 9, 9, 9, 9, 9, 9, 1,
 	0, 0, 0,13,14,11, 0, 0
    };
 
@@ -621,9 +621,9 @@ int move_pseudo_piece(int piece_pos, int des_move)
 		tboard[destination]=tpiece;
 		tboard[piece_pos]=EMPTY;
 
-        display(tboard);
-		printf("\nmove %d to %d\n ",piece_pos,des_move);
-        printboard(tboard,fftest);
+//        display(tboard);
+//		printf("\nmove %d to %d\n ",piece_pos,destination);
+//        printboard(tboard,fftest);
 
 		return destination;
 	}
@@ -658,9 +658,9 @@ int move_pseudo_pawn(int piece_pos, int des_move)
 				tboard[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
 			}
 		}
-		display(tboard);
-		printf("\nmove %d to %d\n ",piece_pos,des_move);
-        printboard(tboard,fftest);
+//		display(tboard);
+//		printf("\nmove %d to %d\n ",piece_pos,destination);
+//        printboard(tboard,fftest);
 		return destination;
 	}
 }
@@ -822,7 +822,7 @@ int not_main()
     fftest=fopen("../filetest.txt","w");
     if(fftest==NULL) return -1;
 
-	copy_board(board,false_init_board);
+	copy_board(board, false_init_board);
 	while(!gameover)
 	{
 		if(ply%2==0)//white one
@@ -865,10 +865,10 @@ int not_main()
 
 //                fprintf(fftest,"==================================================\n");
 //                fprintf(fftest,"this is start at ply %d\n",ply);
-                printboard(board,fftest);
+//                printboard(board,fftest);
 //                fprintf(fftest,"--------------------------------------------------\n");
 
-                maxi(2,false);
+                maxi(4,false);
                 move_piece(start_pos_move, des_pos_move);
                 printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
 
@@ -917,6 +917,6 @@ function minimax(node, depth, maximizingPlayer)
 int main()
 {
     not_main();
-    printf("Hello world!\n");
+//    printf("Hello world!\n");
     return 0;
 }
