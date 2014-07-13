@@ -148,7 +148,6 @@ int move_player_piece(int piece_pos, int des_move);
 int move_pseudo_piece(int piece_pos, int des_move);
 int move_pseudo_pawn(int piece_pos, int des_move);
 int move_piece(int piece_pos, int des_move);
-int move_pawn(int piece_pos, int des_move);
 
 void copy_board(int board_des[64], int board_src[64]);
 void display(int bd[64]);
@@ -511,24 +510,39 @@ bool check_pawn_move(int piece_pos, int des_move)
 	}
 }
 
+//exclusive for player
 int move_player_piece(int piece_pos, int des_move)
 {
+    int piece_type=board[piece_pos]&MASK_PIECE;
     board[des_move]=board[piece_pos];
 	board[piece_pos]=EMPTY;
+
+	//promotion
+	if(piece_type==PAWN)
+    {
+        if(des_move>=56)
+        {
+            board[des_move]=QUEEN;
+        }
+    }
     return 0;
 }
 
+
 bool check_move_player(int player_start, int player_des)
 {
-	int i,j,k;
-	int mail_start, mail_des, mail_diff;
-	bool m_match=false;
-	int m_obstacle_count=0;		//match count
-	int lpiece=board[player_start] & MASK_PIECE;
-	int lcolor=board[player_start] & MASK_COLOR;
-	int lpiece_target=board[player_des] & MASK_PIECE;
-	int lcolor_target=board[player_des] & MASK_COLOR;
-	int	lpiece_check;
+	int i;
+	bool m_match = false;
+	int lpiece = board[player_start] & MASK_PIECE;
+	int lcolor = board[player_start] & MASK_COLOR;
+	int lcolor_target;
+	int lpiece_target;
+	int mb_pos = mailbox64[player_start];				//convert board into mailbox
+	int destination = 0;		//if destination = -1 its out of bound, otherwise board array index
+	int	startDesDiff = 0;
+	int checkDesMove;
+	int allowedMove[32];
+	int allowedMoveCount=0;
 
 	//check piece
 	if(lpiece==EMPTY)
@@ -536,72 +550,99 @@ bool check_move_player(int player_start, int player_des)
 	if(lcolor!=COLOR_WHITE)
 		{ return false;}
 
-	//check boundary
-	if((player_start<0) || (player_start>63))
-		{ return false;}
-	if((player_des<0) || (player_des>63))
-		{ return false;}
-	//check destination
-	if((lpiece_target!=EMPTY)&&(lcolor_target==COLOR_WHITE))
-		{ return false;}
-
 	//check movement rule
-	mail_start = mailbox64[player_start];
-	mail_des = mailbox64[player_des];
-	mail_diff = mail_des - mail_start;
 
-    printf("\n%d %d %d\n",mail_start,mail_des,mail_diff);
+
 	if(lpiece==PAWN)
 	{
-        if((mail_diff==9)||(mail_diff==11))
+        //only allow movement if player_des - player_start= 7/8/9
+        startDesDiff=player_des-player_start;
+        lpiece_target=board[player_des] & MASK_PIECE;
+        lcolor_target=board[player_des] & MASK_COLOR;
+        switch(startDesDiff)
         {
-            if(lpiece_target==EMPTY)
-            { return false;}
-            else
-            {
-                if(lcolor_target==COLOR_WHITE)
-                { return false;}
-                else
-                {
-                     return true;
-                }
-            }
-        }
-        if(mail_diff==10)
-        {
+        case 8:
             if(lpiece_target==EMPTY)
             {
                 return true;
             }
-        }
-        return false;
+            break;
+        case 7:
+            if(lcolor_target==COLOR_BLACK)
+            {
+                return true;
+            }else
+            {
+                return false;
+            }
+            break;
+        case 9:
+            if(lcolor_target==COLOR_BLACK)
+            {
+                return true;
+            }else
+            {
+                return false;
+            }
+            break;
+        default:
+            return false;
+            break;
+        };
+
 	}
-
-	for(i=0;i<number_of_move[lpiece];i++)
-	{
-
-		if((mail_diff%movement[lpiece][i])==0)
-		{
-			m_match=true;
-			break;
-		}
-	}
-
-	if(m_match==false)
-		{ return false;}
 	else
-	{
-		return true;
-		/*
-		if(slide[lpiece])
-		{
-			for(j=mail_start; j<mail_des; j=j+movement[lpiece][i])
-			{
-				if(j!=mail_start
-			}
-		}
-		*/
-	}
+    {
+        for(i=0;i<number_of_move[lpiece];i++)
+        {
+                checkDesMove=0;
+                do
+                {
+                    checkDesMove = checkDesMove+movement[lpiece][i];
+                    destination = mailbox[mb_pos+checkDesMove];
+                    //out of bound
+                    if(destination==-1)
+                    {
+                        break;
+                    }
+
+                    lpiece_target=board[destination] & MASK_PIECE;
+                    lcolor_target=board[destination] & MASK_COLOR;
+
+                    //friendly fire
+                    if((lpiece_target!=EMPTY)&&(lcolor_target==COLOR_WHITE))
+                    {
+                        break;
+                    }
+
+                    if((lpiece_target!=EMPTY)&&(lcolor_target==COLOR_BLACK))
+                    {
+                        allowedMove[allowedMoveCount]=destination;
+                        allowedMoveCount++;
+                        break;
+                    }
+
+                    if(lpiece_target==EMPTY)
+                    {
+                        allowedMove[allowedMoveCount]=destination;
+                        allowedMoveCount++;
+                    }
+
+                }while(slide[lpiece]);
+        }
+        if(allowedMoveCount>0)
+        {
+            for(i=0;i<allowedMoveCount;i++)
+            {
+                if(allowedMove[i]==player_des)
+                {
+                    m_match=true;
+                }
+            }
+        }
+    }
+    return m_match;
+
 }
 
 //return destination array
@@ -666,10 +707,11 @@ int move_pseudo_pawn(int piece_pos, int des_move)
 }
 
 
-//return destination array
+//return destination array, its black move/AI move only
 int move_piece(int piece_pos, int des_move)
 {
 	int tpiece=board[piece_pos];
+	int piece_type=board[piece_pos] & MASK_PIECE;
 	int mb_pos=mailbox64[piece_pos];				//convert board into mailbox
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
 
@@ -680,6 +722,11 @@ int move_piece(int piece_pos, int des_move)
 	}else{
 		board[destination]=tpiece;
 		board[piece_pos]=EMPTY;
+		//promotion for black
+		if((piece_type==PAWN)&&(destination<8))
+        {
+            board[destination]=COLOR_BLACK+QUEEN;
+        }
 		return destination;
 	}
 }
@@ -704,13 +751,6 @@ int move_pawn(int piece_pos, int des_move)
 			if(destination<8)
 			{
 				board[destination]=QUEEN+COLOR_BLACK;//color white=0, so queen+color white=5+0 :P
-			}
-		}
-		if(lcolor==COLOR_WHITE)
-		{
-			if(destination>55)
-			{
-				board[destination]=QUEEN+COLOR_WHITE;//color white=0, so queen+color white=5+0 :P
 			}
 		}
 		return destination;
@@ -838,7 +878,7 @@ int not_main()
 			input_return=check_input(c1);
 			if(input_return<0)
             {
-                printf("\nOops!! illegal move, try again\n\n");
+                printf("\nwrong input, try again\n\n");
             }else
             {
                 tpos=input_return>>6;
@@ -863,19 +903,9 @@ int not_main()
             {
                 copy_board(tboard,board);
 
-//                fprintf(fftest,"==================================================\n");
-//                fprintf(fftest,"this is start at ply %d\n",ply);
-//                printboard(board,fftest);
-//                fprintf(fftest,"--------------------------------------------------\n");
-
-                maxi(4,false);
+                maxi(2,false);
                 move_piece(start_pos_move, des_pos_move);
                 printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
-
-//                fprintf(fftest,"..................................................\n");
-//                fprintf(fftest,"end of ply %d\nthe AI decision is:\n",ply);
-//                printboard(board,fftest);
-//                fprintf("\nvalue %d\n",evaluatebd(board));
 
                 display(board);
                 printf("\nvalue %d\n",evaluate());
