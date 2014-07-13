@@ -27,6 +27,15 @@
 #define COLOR_WHITE		0	//0000
 #define COLOR_BLACK		8	//1000
 
+#define A1  0
+#define B1  1
+#define C1  2
+#define D1  3
+#define E1  4
+#define F1  5
+#define G1  6
+#define H1  7
+
 /*
 	piece = COLOR_X or PIECE_CODE
 	1  = white pawn
@@ -50,8 +59,8 @@ int init_board[64]={
    };
 
 int false_init_board[64]={
-	0, 0, 0, 0, 6, 0, 0, 0,
-	0, 9, 1, 1, 1, 1, 1, 9,
+	4, 2, 0, 0, 6, 0, 0, 4,
+	0, 1, 1, 1, 1, 1, 1, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 2, 0, 0, 5,
@@ -124,10 +133,10 @@ int castling_white_right[3] = {  1,  2, 3};
 int castling_black_left[3]  = { 57, 58, 59};
 int castling_black_right[2] = { 61, 62};
 
-//bool bWhiteAllowCastlingL=true;
-//bool bWhiteAllowCastlingR=true;
-//bool bBlackAllowCastlingL=true;
-//bool bBlackAllowCastlingR=true;
+bool bWhiteAllowCastlingL;
+bool bWhiteAllowCastlingR;
+bool bBlackAllowCastlingL;
+bool bBlackAllowCastlingR;
 
 //bool bWhiteCheck=false;
 //bool bBlackCheck=false;
@@ -525,6 +534,32 @@ int move_player_piece(int piece_pos, int des_move)
             board[des_move]=QUEEN;
         }
     }
+    if(piece_type==ROOK)
+    {
+        if(piece_pos==0)
+            {bWhiteAllowCastlingL=false;}
+        if(piece_pos==7)
+            {bWhiteAllowCastlingR=false;}
+    }
+    if(piece_type==KING)
+    {
+        bWhiteAllowCastlingL=false;
+        bWhiteAllowCastlingR=false;
+        //castling left
+        if(des_move==C1)
+        {
+            board[A1]=EMPTY;
+            board[C1]=KING;
+            board[D1]=ROOK;
+        }
+        //castling right
+        if(des_move==G1)
+        {
+            board[H1]=EMPTY;
+            board[G1]=KING;
+            board[F1]=ROOK;
+        }
+    }
     return 0;
 }
 
@@ -551,8 +586,6 @@ bool check_move_player(int player_start, int player_des)
 		{ return false;}
 
 	//check movement rule
-
-
 	if(lpiece==PAWN)
 	{
         //only allow movement if player_des - player_start= 7/8/9
@@ -637,6 +670,24 @@ bool check_move_player(int player_start, int player_des)
                 if(allowedMove[i]==player_des)
                 {
                     m_match=true;
+                }
+            }
+        }
+        //castling check
+        if(lpiece==KING)
+        {
+            if((player_des==C1)&&(bWhiteAllowCastlingL)&&(board[A1]==ROOK))
+            {
+                if((board[B1]==EMPTY)&&(board[C1]==EMPTY)&&(board[D1]==EMPTY))
+                {
+                    return true;
+                }
+            }
+            if((player_des==G1)&&(bWhiteAllowCastlingR)&&(board[H1]==ROOK))
+            {
+                if((board[F1]==EMPTY)&&(board[G1]==EMPTY))
+                {
+                    return true;
                 }
             }
         }
@@ -862,6 +913,8 @@ int not_main()
     fftest=fopen("../filetest.txt","w");
     if(fftest==NULL) return -1;
 
+    bWhiteAllowCastlingL=true;
+	bWhiteAllowCastlingR=true;
 	copy_board(board, false_init_board);
 	while(!gameover)
 	{
