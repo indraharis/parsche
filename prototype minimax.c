@@ -144,7 +144,7 @@ bool bBlackAllowCastlingR;
 int start_pos_move;
 int des_pos_move;
 
-FILE* fftest;
+//FILE* fftest;
 
 int evaluate();
 int evaluatebd(int bd[64]);
