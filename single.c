@@ -150,7 +150,7 @@ bool bBlackAllowCastlingR;
 int start_pos_move;
 int des_pos_move;
 
-FILE* fftest;
+//FILE* fftest;
 
 int evaluate();
 int evaluatebd(int bd[64]);
@@ -229,18 +229,13 @@ int maxi( int depth, bool maximize ) {
 	int lbestpos;
 	int lbestmove;
     
-    gettimeofday(&time_start,NULL);
-    
     if ( depth <= 0 ) {
-		gettimeofday(&time_stop,NULL);
-		printf("elapsed= %f usec\n",(time_stop.tv_sec-time_start.tv_sec)*1e6+\
-			(time_stop.tv_usec-time_start.tv_usec));
 		return evaluate();
 		}
 		
 	if ( maximize )
 	{
-	    printf("depth %d\n ",depth);
+	    //printf("depth %d\n ",depth);
         max = -V_MAX;
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
@@ -319,15 +314,12 @@ int maxi( int depth, bool maximize ) {
 			}
 		}
 
-		printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
-        printf("\nvalue %d \n ",max);
-		gettimeofday(&time_stop,NULL);
-		printf("elapsed= %f usec\n",(time_stop.tv_sec-time_start.tv_sec)*1e6+\
-			(time_stop.tv_usec-time_start.tv_usec));
+		//printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
+        //printf("value %d \n ",max);
 		return max;
 	}else
 	{
-	    printf("depth %d\n ",depth);
+	    //printf("depth %d\n ",depth);
         max = V_MAX;
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
@@ -412,11 +404,9 @@ int maxi( int depth, bool maximize ) {
 
         start_pos_move=lbestpos;
         des_pos_move=lbestmove;
-		printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
-        printf("\nvalue %d \n ",max);
-		gettimeofday(&time_stop,NULL);
-		printf("elapsed= %f usec\n",(time_stop.tv_sec-time_start.tv_sec)*1e6+\
-			(time_stop.tv_usec-time_start.tv_usec));
+		//printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
+        //printf("value %d \n ",max);
+		
 		return max;
 	}
 }
@@ -725,7 +715,7 @@ int move_pseudo_piece(int piece_pos, int des_move)
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
 
 
-    printf("\npos+move %d\ndestin %d\n ",mb_pos+des_move,destination);
+    //printf("\npos+move %d\ndestin %d\n ",mb_pos+des_move,destination);
 	if(destination==-1)
 	{
 		//out of bound
@@ -938,12 +928,12 @@ int main(int argc, char **argv)
     int input_return;
     int winner=0;
     bool gameover=false;
-    fftest=fopen("../filetest.txt","w");
-    if(fftest==NULL) return -1;
+    //fftest=fopen("../filetest.txt","w");
+    //if(fftest==NULL) return -1;
 
     bWhiteAllowCastlingL=true;
 	bWhiteAllowCastlingR=true;
-	copy_board(board, false_init_board);
+	copy_board(board, init_board);
 	while(!gameover)
 	{
 		if(ply%2==0)//white one
@@ -954,7 +944,7 @@ int main(int argc, char **argv)
 			//-execute
 			//-ply++
 			display(board);
-			printf("\n input your move ");
+			printf("\ninput your move= ");
 			scanf("%s",&c1);
 			input_return=check_input(c1);
 			if(input_return<0)
@@ -984,7 +974,11 @@ int main(int argc, char **argv)
             {
                 copy_board(tboard,board);
 
-                maxi(2,false);
+           		gettimeofday(&time_start,NULL);
+                maxi(6,false);
+				gettimeofday(&time_stop,NULL);
+           		printf("elapsed= %.0f usec\n",(time_stop.tv_sec-time_start.tv_sec)*1e6+\
+					(time_stop.tv_usec-time_start.tv_usec));
                 move_piece(start_pos_move, des_pos_move);
                 printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
 
@@ -1006,7 +1000,9 @@ int main(int argc, char **argv)
             }
         }
 	}
-	fclose(fftest);
+	//fclose(fftest);
+	MPI_Finalize();
+	return(0);
 }
 
 /* //from wiki-wikipedia
