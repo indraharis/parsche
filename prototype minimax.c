@@ -978,7 +978,7 @@ int not_main()
             }
         }
 	}
-	fclose(fftest);
+	//fclose(fftest);
 }
 /* //from wiki-wikipedia
 function minimax(node, depth, maximizingPlayer)
