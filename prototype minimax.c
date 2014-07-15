@@ -225,7 +225,7 @@ int maxi( int depth, bool maximize ) {
     if ( depth <= 0 ) return evaluate();
 	if ( maximize )
 	{
-	    printf("depth %d\n ",depth);
+	    //printf("depth %d\n ",depth);
         max = -V_MAX;
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
@@ -277,7 +277,7 @@ int maxi( int depth, bool maximize ) {
 								copy_board(tboard, history_board[depth]);	//return board
 								break;										//stop
 							}
-
+                            // if empty
 							move_pseudo_piece(i,des_move);
 							score = maxi( depth - 1, false );
 							if(score>max)
@@ -304,12 +304,12 @@ int maxi( int depth, bool maximize ) {
 			}
 		}
 
-		printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
-        printf("\nvalue %d \n ",max);
+		//printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
+        //printf("\nvalue %d \n ",max);
 		return max;
-	}else
+	}else   //minimum
 	{
-	    printf("depth %d\n ",depth);
+	    //printf("depth %d\n ",depth);
         max = V_MAX;
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
@@ -394,8 +394,8 @@ int maxi( int depth, bool maximize ) {
 
         start_pos_move=lbestpos;
         des_pos_move=lbestmove;
-		printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
-        printf("\nvalue %d \n ",max);
+		//printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
+        //printf("\nvalue %d \n ",max);
 		return max;
 	}
 }
@@ -406,7 +406,7 @@ int maxi( int depth, bool maximize ) {
 	3. check friendly piece
 
  */
-bool check_move(int piece_pos, int des_move)
+bool check_move(int piece_pos, int des_move)    //for computer move
 {
 	int lpiece=board[piece_pos] & MASK_PIECE;
 	int lcolor=board[piece_pos] & MASK_COLOR;
@@ -704,7 +704,7 @@ int move_pseudo_piece(int piece_pos, int des_move)
 	int destination = mailbox[mb_pos+des_move];		//if destination = -1 its out of bound, otherwise board array index
 
 
-    printf("\npos+move %d\ndestin %d\n ",mb_pos+des_move,destination);
+    //printf("\npos+move %d\ndestin %d\n ",mb_pos+des_move,destination);
 	if(destination==-1)
 	{
 		//out of bound
@@ -910,8 +910,8 @@ int not_main()
     int input_return;
     int winner=0;
     bool gameover=false;
-    fftest=fopen("../filetest.txt","w");
-    if(fftest==NULL) return -1;
+    //fftest=fopen("../filetest.txt","w");
+    //if(fftest==NULL) return -1;
 
     bWhiteAllowCastlingL=true;
 	bWhiteAllowCastlingR=true;
@@ -947,9 +947,9 @@ int not_main()
                 }
             }
 
-		}else
+		}else           //computer's turn
 		{
-		    if(ply<3)
+		    if(ply<3)   //opening book
             {
                 move_piece(52,-10);
             }else
@@ -958,10 +958,10 @@ int not_main()
 
                 maxi(2,false);
                 move_piece(start_pos_move, des_pos_move);
-                printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
+                //printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
 
                 display(board);
-                printf("\nvalue %d\n",evaluate());
+                //printf("\nvalue %d\n",evaluate());
             }
 			ply++;
 		}
