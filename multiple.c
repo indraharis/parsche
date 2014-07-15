@@ -992,9 +992,9 @@ int main(int argc, char **argv){
 			gettimeofday(&time_start,NULL);
             maxi(6, false, i_start, i_stop);
 			gettimeofday(&time_stop,NULL);
-			printf("node%d suggested \(%d to %d\) val=%d, t=.0f usec\n",node_rank, \
-			start_pos_move, des_pos_move, value_pos_move, 
-			(time_stop.tv_sec-time_start.tv_sec)*1e6+\(time_stop.tv_usec-time_start.tv_usec));
+			printf("node%d suggested (%d to %d) val=%d, t=.0f usec \n",node_rank,
+				start_pos_move, des_pos_move, value_pos_move,
+				(time_stop.tv_sec-time_start.tv_sec)*1e6+(time_stop.tv_usec-time_start.tv_usec));
             // send pos_moves and val to master
             MPI_Send(&start_pos_move, 1, MPI_INT, 0, TAG_POS_STR, MPI_COMM_WORLD);
             MPI_Send(&des_pos_move, 1, MPI_INT, 0, TAG_POS_DES, MPI_COMM_WORLD);
