@@ -16,7 +16,7 @@ struct timeval time_start, time_stop;
 #define V_ROOK		500		//value of rook
 #define V_QUEEN		900		//value of queen
 #define V_KING		30000	//value of king
-#define V_MAX		900000	//value of maximum point
+#define V_MAX		900000	//bestValue of minimax
 
 // PIECE_CODE
 #define EMPTY			0
@@ -228,11 +228,11 @@ int maxi( int depth, bool maximize ) {
 	int des_move; 	//destination move
 	int lbestpos;
 	int lbestmove;
-    
+
     if ( depth <= 0 ) {
 		return evaluate();
 		}
-		
+
 	if ( maximize )
 	{
 	    //printf("depth %d\n ",depth);
@@ -287,7 +287,7 @@ int maxi( int depth, bool maximize ) {
 								copy_board(tboard, history_board[depth]);	//return board
 								break;										//stop
 							}
-
+                            //if empty
 							move_pseudo_piece(i,des_move);
 							score = maxi( depth - 1, false );
 							if(score>max)
@@ -317,7 +317,7 @@ int maxi( int depth, bool maximize ) {
 		//printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
         //printf("value %d \n ",max);
 		return max;
-	}else
+	}else   //minimum
 	{
 	    //printf("depth %d\n ",depth);
         max = V_MAX;
@@ -406,7 +406,7 @@ int maxi( int depth, bool maximize ) {
         des_pos_move=lbestmove;
 		//printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
         //printf("value %d \n ",max);
-		
+
 		return max;
 	}
 }
@@ -922,7 +922,7 @@ int main(int argc, char **argv)
 	MPI_Comm_size(MPI_COMM_WORLD, &node_count);
 	MPI_Comm_rank(MPI_COMM_WORLD, &node_rank);
 	MPI_Get_processor_name(node_name, &node_namelen);
-    
+
     char c1[16],c2;
     int tpos,tdes;
     int input_return;
@@ -944,7 +944,7 @@ int main(int argc, char **argv)
 			//-execute
 			//-ply++
 			display(board);
-			printf("\ninput your move= ");
+			printf("\n input your move ");
 			scanf("%s",&c1);
 			input_return=check_input(c1);
 			if(input_return<0)
@@ -965,9 +965,9 @@ int main(int argc, char **argv)
                 }
             }
 
-		}else
+		}else           //computer's turn
 		{
-		    if(ply<3)
+		    if(ply<3)   //opening book
             {
                 move_piece(52,-10);
             }else
@@ -980,10 +980,10 @@ int main(int argc, char **argv)
            		printf("elapsed= %.0f usec\n",(time_stop.tv_sec-time_start.tv_sec)*1e6+\
 					(time_stop.tv_usec-time_start.tv_usec));
                 move_piece(start_pos_move, des_pos_move);
-                printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
+                //printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
 
                 display(board);
-                printf("\nvalue %d\n",evaluate());
+                //printf("\nvalue %d\n",evaluate());
             }
 			ply++;
 		}
