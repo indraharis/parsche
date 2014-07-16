@@ -12,6 +12,9 @@
 #define TAG_BOARD 5
 #define TAG_PLY 6
 
+//AI's thinking depth, must be even
+#define DEPTH 2
+
 // PIECE_VALUE
 #define V_NULL		0		//value of null space
 #define V_PAWN		100		//value of pawn
@@ -57,7 +60,7 @@
 // global vars
 int node_count, node_rank, node_namelen;
 char node_name[MPI_MAX_PROCESSOR_NAME];
-struct timeval time_start, time_stop;
+struct timeval time_start, time_stop, time_start_global, time_stop_global;
 MPI_Status status;
 int i_start, i_stop;
 int start_pos_move, des_pos_move, value_pos_move;
@@ -858,7 +861,7 @@ void copy_board(int board_des[64], int board_src[64])
 void display(int bd[64])
 {
 	int i;
-	printf(" ");
+	printf("\n\n ");
 	for(i=0;i<64;i++)
 	{
 	    if(bd[i]==0)
@@ -958,15 +961,14 @@ int main(int argc, char **argv){
 			if (node_rank==0){
 				// masukan dari sini
 				display(board);
-				printf("\n input your move ");
+				//printf("Input your move: ");
 				scanf("%s",&c1);
 				input_return=check_input(c1);
-				if(input_return<0) printf("\nwrong input, try again\n\n");
+				if(input_return<0) printf("\nWrong input, try again\n");
 				else
 				{
 					tpos=input_return>>6;
 					tdes=input_return&63;
-					printf("\nmove from %d to %d\n",tpos,tdes);
 					if(check_move_player(tpos,tdes))
 					{
 						move_player_piece(tpos,tdes);
@@ -975,8 +977,10 @@ int main(int argc, char **argv){
 						for (i=0; i<node_count; i++){
 							MPI_Send(&board,64,MPI_INT,i,TAG_BOARD,MPI_COMM_WORLD);
 							}
+				//		display(board);	
+						printf("\nPlayer moves %d to %d\n",tpos,tdes);
 					}
-					else printf("\nOops!! illegal move, try again\n\n");
+					else printf("\nOops!! illegal move, try again\n");
             	}		
 			}
 			else {
@@ -989,10 +993,16 @@ int main(int argc, char **argv){
 		else  //computer's turn
 		{
 		    copy_board(tboard,board);
-			gettimeofday(&time_start,NULL);
-            maxi(6, false, i_start, i_stop);
+			gettimeofday(&time_start_global,NULL);
+            gettimeofday(&time_start,NULL);
+            if (ply<3){ // opening book
+				start_pos_move= 52;
+				des_pos_move= -10;
+				value_pos_move= 500;
+				}
+			else maxi(DEPTH, false, i_start, i_stop);
 			gettimeofday(&time_stop,NULL);
-			printf("node%d suggested (%d to %d) val=%d, t=.0f usec \n",node_rank,
+			printf("\nNode%d suggested (%d to %d) val=%d, t=%.0f usec",node_rank,
 				start_pos_move, des_pos_move, value_pos_move,
 				(time_stop.tv_sec-time_start.tv_sec)*1e6+(time_stop.tv_usec-time_start.tv_usec));
             // send pos_moves and val to master
@@ -1001,7 +1011,7 @@ int main(int argc, char **argv){
             MPI_Send(&value_pos_move, 1, MPI_INT, 0, TAG_VAL, MPI_COMM_WORLD);
                            
 			current= 0;
-			if (node_rank==0) {
+			if (node_rank==0){
 				// master select from the best val
 				for (i=0; i<node_count; i++){
 					// recv start_pos, des_pos, val from underlings
@@ -1013,16 +1023,20 @@ int main(int argc, char **argv){
 						current= value_pos_move_global[i];
 					}
 				move_piece(start_pos_move_global[max], des_pos_move_global[max]);
-				display(board);
-				printf("\nexecuted move: %d %d",start_pos_move_global[max],des_pos_move_global[max]);
-				printf("\ncurrent score: %d\n\n",evaluate());
+				gettimeofday(&time_stop_global,NULL);
+            	//display(board);
+				printf("\nExecuted move: %d %d",start_pos_move_global[max],des_pos_move_global[max]);
+				//printf("\nCurrent score: %d",evaluate());
+				printf("\nTotal processing time: %.0f usec",
+					(time_stop_global.tv_sec-time_start_global.tv_sec)*1e6\
+					+(time_stop_global.tv_usec-time_start_global.tv_usec));
 				// broadcast board
 				for (i=0; i<node_count; i++){
 					MPI_Send(&board,64,MPI_INT,i,TAG_BOARD,MPI_COMM_WORLD);
 					}
 				}
 			// recv recently boardcasted board	
-            MPI_Recv(&board,64,MPI_INT,0,TAG_BOARD,MPI_COMM_WORLD,&status);
+            else MPI_Recv(&board,64,MPI_INT,0,TAG_BOARD,MPI_COMM_WORLD,&status);
 			ply++;
 		}
 		
