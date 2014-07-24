@@ -888,19 +888,42 @@ int check_winning_player()
     }
     return winner;
 }
+/*
+	karena ch adalah pointer atau array jika diberi index ch[n].
+	di fungsi ini jika format masukan valid maka nilai kembalian/return check_input() 
+	adalah array awal(tpos) dan array tujuan(tdes) yang sudah di-Enkode-kan.	
+	nilai -1 berarti format masukan tidak valid.
+	
+	++format enkode return value
+	
+	tpos: mmmmmm000000
+	tdes: 	    nnnnnn
+	------------------- +
+	ret	: mmmmmmnnnnnn
+	
+	*format diatas dalam bentuk biner
+	tpos harus digeser ke kiri sejauh 6 bit lalu ditambah tdes
+	return value/nilai kembalian fungsi ini harus di-Dekode-kan dahulu sebelum bisa digunakan.
+*/
 int check_input(char* ch)
 {
     int tpos=-1, tdes=-1;
-    if((ch[0]<'a')||(ch[0]>'h')) return -1;
-    if((ch[1]<'1')||(ch[1]>'8')) return -1;
+	// return -1 berarti fungsi keluar dengan nilai -1
+    if((ch[0]<'a')||(ch[0]>'h')) return -1;	//jika karakter ASCII ch[0] bukan 'a' sampai 'h' berarti error
+    if((ch[1]<'1')||(ch[1]>'8')) return -1; //jika karakter ASCII ch[1] bukan '1' sampai '8' berarti error
     if((ch[2]<'a')||(ch[2]>'h')) return -1;
     if((ch[3]<'1')||(ch[3]>'8')) return -1;
 
+	/*	
+		mengubah koordinat catur (a1, c3, h8 dst..) menjadi array 1 dimensi (0-63) dengan cara:
+		(baris*8)+kolom
+		dalam hal ini kolom adalah ch[0] dan ch[2], baris adalah ch[1] dan ch[3]
+	*/
     tpos=ch[0]-'a';
     tpos=tpos+(ch[1]-'1')*8;
     tdes=ch[2]-'a';
     tdes=tdes+(ch[3]-'1')*8;
-    return (tpos<<6)|tdes;
+    return (tpos<<6)|tdes;	//enkoding, geser tpos ke kiri sejauh 6 bit lalu ditambahkan tdes.
 }
 //its just dummy main function
 int not_main()
@@ -929,11 +952,14 @@ int not_main()
 			printf("\n input your move ");
 			scanf("%s",&c1);
 			input_return=check_input(c1);
+			//check jika masukan valid atau tidak 
 			if(input_return<0)
             {
+				//input_return -1 berarti tidak valid
                 printf("\nwrong input, try again\n\n");
             }else
-            {
+            {	
+				//jika valid, maka Dekode input_return
                 tpos=input_return>>6;
                 tdes=input_return&63;
                 printf("\nmove from %d to %d\n",tpos,tdes);
