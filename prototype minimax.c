@@ -170,15 +170,15 @@ int evaluate()
 	int lpiece;
 	int lcolor;
 
-	for(i=0;i<64;i++)
+	for(i=0;i<64;i++)	//scan seluruh tboard
 	{
 
-		lpiece = tboard[i] & MASK_PIECE;
+		lpiece = tboard[i] & MASK_PIECE;	//pisahkan informasi bidak dan warna
 		lcolor = tboard[i] & MASK_COLOR;
-		if(lcolor == COLOR_WHITE)
+		if(lcolor == COLOR_WHITE)			//jika warnanya putih maka ditambah score bidak
 		{
 			total = total + pieces_value[lpiece];
-		}else
+		}else								//jika warnya hitam maka dikurangi
 		{
 			total = total - pieces_value[lpiece];
 		}
@@ -211,6 +211,22 @@ int evaluatebd(int bd[64])
 
 /*
 	this is our monster!!
+	maxi adalah implementasi minimax berguna sebagai pengambil keputusan
+	board yang digunakan maxi adalah tboard, sehingga tidak mempengaruhi board utama.
+	maxi akan mencari gerakan yang terbaik sesuai metode minimax dengan cara mengevaluasi menggunakan 'int evaluate()'
+	gerakan adalah data mengenai 
+	1. "posisi bidak "
+	2. "arah gerak"
+	data gerakan tersebut disimpan di variabel global 'int start_pos_move' dan 'int des_pos_move'
+	
+	cara kerja maxi meng-generate move:
+	1. cek semua bidak
+	2. cek semua kemungkinan gerakan bidak tersebut
+	3. jalankan
+	4. masuk depth
+	5. evaluasi
+	
+	untuk lebih jelasnya lihat gambar http://en.wikipedia.org/wiki/File:Plminmax.gif
 */
 int maxi( int depth, bool maximize ) {
 	int max;		//max or min
@@ -232,10 +248,11 @@ int maxi( int depth, bool maximize ) {
 		for ( i=0; i<64; i++ ) {						//scan board
 			lpiece = tboard[i] & MASK_PIECE;
 			lcolor = tboard[i] & MASK_COLOR;
-			if(( lpiece != EMPTY) && ( lcolor == COLOR_WHITE))
+			if(( lpiece != EMPTY) && ( lcolor == COLOR_WHITE))	//apakah warnanya putih?
 			{
-				if(lpiece==PAWN)
+				if(lpiece==PAWN)								//apakah pion? (pion diistimewakan karena memiliki gerakan yang berbeda dengan bidak lainya)
 				{
+				//move generation untuk pion
 					for ( n_move = 0; n_move < 3; n_move++ )
 					{
 						des_move = movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; if its BLACK */
@@ -252,8 +269,9 @@ int maxi( int depth, bool maximize ) {
 						}
 					}
 
-				}else
+				}else		//jika bukan pion
 				{
+				//move generation
 					for ( n_move = 0; n_move < number_of_move[lpiece]; n_move++ )
 					{
 						des_move=0;
@@ -309,7 +327,7 @@ int maxi( int depth, bool maximize ) {
 		return max;
 	}else   //minimum
 	{
-	    //printf("depth %d\n ",depth);
+	    //sama dengan maximum, tapi yang digerakan bidak hitam dan nilai minimum
         max = V_MAX;
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
@@ -327,7 +345,7 @@ int maxi( int depth, bool maximize ) {
 						{
 							move_pseudo_pawn(i,des_move);
 							score = maxi( depth - 1, true );
-							if(score<max)
+							if(score<max)//jika nilai lebih baik(lebih kecil) maka simpan sementara informasi gerakan
 								{
 									max=score;
 									lbestpos=i;
@@ -391,11 +409,10 @@ int maxi( int depth, bool maximize ) {
 				}
 			}
 		}
-
+		//informasi gerakan terakhir adalah gerakan yang terbaik
         start_pos_move=lbestpos;
         des_pos_move=lbestmove;
-		//printf("\nstart pos: %d destination: %d\n ",start_pos_move,des_pos_move);
-        //printf("\nvalue %d \n ",max);
+		
 		return max;
 	}
 }
