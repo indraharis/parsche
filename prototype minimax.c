@@ -163,7 +163,7 @@ void display(int bd[64]);
 void printboard(int bd[64],FILE* tfile);
 int not_main();
 
-int evaluate()
+int evaluate()			//fungsi evaluasi
 {
 	int i;
 	int total=0;
@@ -246,7 +246,7 @@ int maxi( int depth, bool maximize ) {
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
 		for ( i=0; i<64; i++ ) {						//scan board
-			lpiece = tboard[i] & MASK_PIECE;
+			lpiece = tboard[i] & MASK_PIECE;			//pengecekan warna putih
 			lcolor = tboard[i] & MASK_COLOR;
 			if(( lpiece != EMPTY) && ( lcolor == COLOR_WHITE))	//apakah warnanya putih?
 			{
@@ -256,11 +256,11 @@ int maxi( int depth, bool maximize ) {
 					for ( n_move = 0; n_move < 3; n_move++ )
 					{
 						des_move = movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; if its BLACK */
-						if(check_pawn_move(i,des_move))
+						if(check_pawn_move(i,des_move))			//mengecek gerakan pawn putih
 						{
 							move_pseudo_pawn(i,des_move);
 							score = maxi( depth - 1, false );
-							if(score>max)
+							if(score>max)						//membandingkan nilai terbaik untuk maximum
 								{
 									max=score;
 
@@ -278,12 +278,12 @@ int maxi( int depth, bool maximize ) {
 						do
 						{
 							des_move=des_move+movement[lpiece][n_move];
-							if(!check_move(i,des_move))
+							if(!check_move(i,des_move))			//mengecek gerakan bidak putih
 							{
 								break;
 							}
 
-							if(check_target_color(i,des_move))	//if capture
+							if(check_target_color(i,des_move))	//if can captured
 							{
 								move_pseudo_piece(i,des_move);
 								score = maxi( depth - 1, false );
@@ -332,16 +332,16 @@ int maxi( int depth, bool maximize ) {
 
 		copy_board( history_board[depth], tboard);		//record history (of three kingdom)
 		for ( i=0; i<64; i++ ) {						//scan board
-			lpiece = tboard[i] & MASK_PIECE;
+			lpiece = tboard[i] & MASK_PIECE;			//pengecekan warna hitam
 			lcolor = tboard[i] & MASK_COLOR;
-			if(( lpiece != EMPTY) && ( lcolor == COLOR_BLACK))
+			if(( lpiece != EMPTY) && ( lcolor == COLOR_BLACK)) //apakah tidak kosong dan warnanya hitam?
 			{
 				if(lpiece==PAWN)
 				{
 					for ( n_move = 0; n_move < 3; n_move++ )
 					{
 						des_move = -movement[lpiece][n_move];	/* des_move = -movement[lpiece][n_move]; if its BLACK */
-						if(check_pawn_move(i,des_move))
+						if(check_pawn_move(i,des_move))		//mengecek gerakan pawn hitam
 						{
 							move_pseudo_pawn(i,des_move);
 							score = maxi( depth - 1, true );
@@ -363,12 +363,12 @@ int maxi( int depth, bool maximize ) {
 						do
 						{
 							des_move=des_move+movement[lpiece][n_move];
-							if(!check_move(i,des_move))
+							if(!check_move(i,des_move))			//mengecek gerakan bidak hitam
 							{
 								break;
 							}
 
-							if(check_target_color(i,des_move))	//if capture
+							if(check_target_color(i,des_move))	//if can captured
 							{
 								move_pseudo_piece(i,des_move);
 								score = maxi( depth - 1, true );
@@ -982,7 +982,7 @@ int not_main()
                 printf("\nmove from %d to %d\n",tpos,tdes);
                 if(check_move_player(tpos,tdes))
                 {
-                    move_player_piece(tpos,tdes);
+                    move_player_piece(tpos,tdes);		//eksekusi gerakan manusia
                     ply++;
                 }else
                 {
@@ -994,13 +994,13 @@ int not_main()
 		{
 		    if(ply<3)   //opening book
             {
-                move_piece(52,-10);
+                move_piece(52,-10);						//eksekusi gerakan book
             }else
             {
                 copy_board(tboard,board);
 
                 maxi(2,false);
-                move_piece(start_pos_move, des_pos_move);
+                move_piece(start_pos_move, des_pos_move); //eksekusi gerakan komputer dengan minimax
                 //printf("\nbest move %d %d\n",start_pos_move,des_pos_move);
 
                 display(board);
